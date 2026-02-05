@@ -62,17 +62,19 @@
 
         .container { max-width: 900px; margin: 0 auto; padding: calc(20px + var(--safe-top)) 24px calc(25px + var(--safe-bottom)) 24px; }
 
+        /* Fixed Overlap Issues in Header */
         .top-meta { margin-bottom: 25px; }
-        .meta-line-1 { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 15px; font-weight: 500; }
-        .meta-right { display: flex; align-items: center; gap: 10px; }
-        #display-timer { font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; font-weight: 600; }
+        .meta-line-1 { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 15px; font-weight: 500; }
+        .meta-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+        #display-timer-label { font-size: 0.65rem; }
+        #display-timer { font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; font-weight: 600; white-space: nowrap; }
 
-        .brand-greeting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .greeting-stack { display: flex; flex-direction: column; gap: 2px; }
-        .user-greeting-line1 { font-size: 0.85rem; font-weight: 500; color: var(--text); letter-spacing: 0.2px; }
+        .brand-greeting-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 30px; }
+        .greeting-stack { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+        .user-greeting-line1 { font-size: 0.85rem; font-weight: 500; color: var(--text); letter-spacing: 0.2px; overflow: hidden; text-overflow: ellipsis; }
         .user-greeting-line2 { font-size: 0.85rem; font-weight: 500; color: var(--text-dim); letter-spacing: 0.2px; }
         
-        .logo-container { width: 48px; height: 48px; border-radius: 12px; background: transparent; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; padding: 4px; }
+        .logo-container { width: 48px; height: 48px; border-radius: 12px; background: transparent; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; padding: 4px; flex-shrink: 0; }
         .app-logo-small { width: 100%; height: 100%; object-fit: contain; }
         .logo-fallback { display: none; color: var(--primary); font-size: 1.1rem; font-weight: 900; }
 
@@ -125,7 +127,6 @@
         .guide-step { margin-bottom: 18px; padding-left: 10px; border-left: 1px solid var(--light-shadow); position: relative; }
         .guide-step .step-title { color: var(--text); font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 3px; }
         .guide-step p { font-size: 0.75rem; color: var(--text-dim); line-height: 1.5; margin: 0; }
-        .guide-step p b { color: var(--text); font-weight: 700; }
 
         .footer { margin-top: 80px; text-align: center; padding: 40px 0 20px 0; border-top: 1px solid rgba(255,255,255,0.05); }
         .footer-text { font-size: 0.55rem; color: var(--text-dim); font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; opacity: 0.5; }
@@ -153,7 +154,7 @@
             <div class="meta-line-1">
                 <div id="display-date">...</div>
                 <div class="meta-right">
-                    <div id="display-timer-label">Reset In:</div>
+                    <div id="display-timer-label">Next-Day Reset In:</div>
                     <div id="display-timer">...</div>
                     <div class="header-icon" onclick="openOverlay('howto-overlay')" style="font-size: 0.8rem; font-weight: 900;">?</div>
                     <div class="header-icon" onclick="openOverlay('settings-overlay')">⚙️</div>
@@ -227,7 +228,7 @@
         </div>
 
         <footer class="footer">
-            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.0.3</div>
+            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.0.7</div>
         </footer>
     </div>
 
@@ -238,18 +239,90 @@
             <h2 style="margin-bottom: 30px; font-weight: 800; color: var(--primary-dark);">Manual</h2>
             
             <div class="guide-section">
+                <h3>Quick Start Guide</h3>
+                <div class="guide-step">
+                    <span class="step-title">1. Initialize Cycle</span>
+                    <p>Tap the New Month button. This will clear previous data and allow you to set your total monthly spending budget.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">2. Personalize Settings</span>
+                    <p>Tap the Gear icon to set your name, currency, and Next-Day Reset Policy. Ensure the policy matches your region for accurate daily resets.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">3. Daily Usage</span>
+                    <p>Enter every expense into the Transaction box. The system automatically redistributes remaining or overspent funds across the rest of the month.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">4. Income Adjustments</span>
+                    <p>If you receive extra money during the month, use the Add Funds button to inject it into your pool and boost your daily limits instantly.</p>
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <h3>Transaction Entry</h3>
+                <div class="guide-step">
+                    <span class="step-title">Amount Input</span>
+                    <p>Enter the specific value of your expenditure in the Transaction box. This field only accepts numeric values and represents a single purchase or log.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Confirm Spend</span>
+                    <p>Submits the transaction. The amount is instantly subtracted from your today's limit and the global pool. The system will block the confirm action if your spend exceeds your safety liquidity floor.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Save Shortcut</span>
+                    <p>Check this before confirming to remember recurring costs. Enter a label (e.g., Lunch), and a quick-log button will appear for one-tap entry in the future.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Quick Log Buttons</span>
+                    <p>Once a shortcut is saved, these appear below the input. Tap one to instantly pre-fill the transaction amount for that item.</p>
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <h3>Dashboard Analytics</h3>
+                <div class="guide-step">
+                    <span class="step-title">Limit Today</span>
+                    <p>The core of the app. This is your live spendable balance for today. If you overspend today, tomorrow's limit automatically shrinks. If you undersave, tomorrow's limit grows.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Original Budget</span>
+                    <p>Displays what your daily limit should have been if you were perfectly following your baseline pool. It serves as a benchmark for your performance.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Spent Today</span>
+                    <p>The total sum of all transactions confirmed within the current 24-hour cycle.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Total Pool Remaining</span>
+                    <p>Your ultimate liquidity floor. This is the total amount of money left for the rest of the month. When this hits zero, spending is blocked.</p>
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <h3>Action Controls</h3>
+                <div class="guide-step">
+                    <span class="step-title">Add Funds</span>
+                    <p>Use this to inject unexpected income or top-ups into your global pool. It instantly recalculates and increases your daily limits.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Liquidity Forecast</span>
+                    <p>A projection table showing exactly what your daily limits will be for every remaining day of the month based on your current performance.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">History Logs</span>
+                    <p>Access categorized records for Funds (Income/Top-ups) and Spending (Expenditures grouped by date) to track your flow.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">New Month</span>
+                    <p>The reset trigger. Use this at the start of a new financial cycle to clear old data and set a fresh monthly pool.</p>
+                </div>
+            </div>
+
+            <div class="guide-section">
                 <h3>Settings (⚙️)</h3>
                 <div class="guide-step">
-                    <span class="step-title">Identifier</span>
-                    <p>Enter your name to personalize your greeting line.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">Currency</span>
-                    <p>Select your currency symbol applied globally across the app.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">Policy (Reset Time)</span>
-                    <p>Defines the start of your financial day. Indian policy triggers at 6:00 AM, while International resets at Midnight.</p>
+                    <span class="step-title">Identifier & Currency</span>
+                    <p>Personalize your greeting and select from over 10 global currency symbols.</p>
                 </div>
                 <div class="guide-step">
                     <span class="step-title">Safety Liquidity Floor (Min Amount)</span>
@@ -257,30 +330,18 @@
                 </div>
                 <div class="guide-step">
                     <span class="step-title">Velocity Weights (Mon - Sun)</span>
-                    <p>Distribute your monthly pool by defining ratios or weights for each day of the week. Use higher numbers for days you spend more (e.g., 2.0 for weekends) to shift more budget to those specific days.</p>
-                </div>
-            </div>
-
-            <div class="guide-section">
-                <h3>Dashboard Logic</h3>
-                <div class="guide-step">
-                    <span class="step-title">Next-Day Reset</span>
-                    <p>The system resets automatically in real-time when the "Reset In" clock hits zero. It archives yesterday's performance and calculates your new limit instantly.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">Safety Halt</span>
-                    <p>A safety mechanism that blocks transactions if they would breach your protected minimum liquidity floor.</p>
+                    <p>Distribute your monthly pool by defining ratios for each day. Use higher numbers (e.g., 2.0) for days you spend more to shift more budget to those days automatically.</p>
                 </div>
             </div>
 
             <div class="guide-section">
                 <h3>Installation</h3>
                 <div class="guide-step">
-                    <span class="step-title">Android (Chrome)</span>
+                    <span class="step-title">Android</span>
                     <p>Tap (⋮) and select "Install app" or "Add to Home screen".</p>
                 </div>
                 <div class="guide-step">
-                    <span class="step-title">iOS (Safari)</span>
+                    <span class="step-title">iOS</span>
                     <p>Tap "Share" and select "Add to Home Screen".</p>
                 </div>
             </div>
@@ -314,7 +375,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Reset Policy</label>
+                <label>Next-Day Reset Policy</label>
                 <select id="set-policy">
                     <option value="indian">Indian (6:00 AM Reset)</option>
                     <option value="intl">Global (Midnight Reset)</option>
@@ -372,7 +433,6 @@
         const getEffectiveDate = () => { let now = new Date(); if (state.policy === 'indian') now.setHours(now.getHours() - 6); return now; };
         const validateNumeric = (val, field) => { if (val === "" || isNaN(parseFloat(val))) { notify(`Entry Error: ${field} requires numbers`, "danger"); return false; } return true; };
 
-        // Real-time currency labels update function
         const updateDynamicCurrencyLabels = (newCurrency) => {
             document.querySelectorAll('.dynamic-currency').forEach(el => {
                 el.innerText = newCurrency;

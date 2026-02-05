@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nero-sync-v1.0.3';
+const CACHE_NAME = 'nero-sync-v1.0.7';
 const ASSETS = [
   './',
   './index.html',
