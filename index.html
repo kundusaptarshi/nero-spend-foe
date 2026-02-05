@@ -10,9 +10,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
+        // Service Worker Registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('Nero Sync active.');
+                }).catch(err => {
+                    console.log('Sync failed: ', err);
+                });
+            });
+        }
+
         /**
          * Global error handler for the logo image. 
-         * Defined in head to ensure availability before image parsing.
          */
         function handleLogoError(img) {
             img.style.display = 'none';
@@ -39,7 +49,7 @@
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             
-            /* Tactile Shadows */
+            /* Shadows */
             --out-shadow: -5px -5px 12px var(--light-shadow), 5px 5px 12px var(--dark-shadow);
             --in-shadow: inset -3px -3px 8px var(--light-shadow), inset 3px 3px 8px var(--dark-shadow);
             --btn-active: inset -2px -2px 5px var(--light-shadow), inset 2px 2px 5px var(--dark-shadow);
@@ -55,25 +65,23 @@
 
         .container { max-width: 900px; margin: 0 auto; padding: calc(20px + var(--safe-top)) 24px calc(25px + var(--safe-bottom)) 24px; }
 
-        /* Top Header Meta */
         .top-meta { margin-bottom: 25px; }
         .meta-line-1 { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 15px; font-weight: 500; }
         .meta-right { display: flex; align-items: center; gap: 10px; }
         #display-timer { font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; font-weight: 600; }
 
-        /* Brand Greeting Area */
         .brand-greeting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .greeting-stack { display: flex; flex-direction: column; gap: 2px; }
         .user-greeting-line1 { font-size: 0.85rem; font-weight: 500; color: var(--text); letter-spacing: 0.2px; }
         .user-greeting-line2 { font-size: 0.85rem; font-weight: 500; color: var(--text-dim); letter-spacing: 0.2px; }
         
-        .logo-container { width: 48px; height: 48px; border-radius: 12px; background: var(--surface); box-shadow: var(--out-shadow); display: flex; align-items: center; justify-content: center; padding: 6px; }
+        /* Non-button Logo Styling */
+        .logo-container { width: 48px; height: 48px; border-radius: 12px; background: transparent; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; padding: 4px; }
         .app-logo-small { width: 100%; height: 100%; object-fit: contain; }
         .logo-fallback { display: none; color: var(--primary); font-size: 1.1rem; font-weight: 900; }
 
         .dashboard-main { display: grid; grid-template-columns: 1.6fr 1fr; gap: 25px; margin-bottom: 30px; }
 
-        /* Log Section */
         .log-section { background: var(--surface); padding: 35px 30px; border-radius: 40px; box-shadow: var(--out-shadow); text-align: left; display: flex; flex-direction: column; justify-content: space-between; }
         .log-section h2 { font-size: 0.8rem; color: var(--text); text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2.5px; font-weight: 800; }
         .input-recess { background: var(--surface); border-radius: 20px; box-shadow: var(--in-shadow); padding: 15px 25px; margin-bottom: 25px; }
@@ -88,7 +96,6 @@
         .quick-btn { background: var(--surface); border: none; color: var(--text-dim); padding: 12px 20px; border-radius: 16px; font-size: 0.75rem; font-weight: 600; cursor: pointer; box-shadow: var(--out-shadow); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .quick-btn:active { box-shadow: var(--btn-active); transform: scale(0.98); color: var(--primary); }
 
-        /* Stats Sidebar */
         .stats-sidebar { display: flex; flex-direction: column; gap: 20px; }
         .stat-card { background: var(--surface); padding: 28px; border-radius: 35px; box-shadow: var(--out-shadow); display: flex; flex-direction: column; justify-content: center; flex: 1; }
         .stat-card .label { font-size: 0.8rem; color: var(--text); text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; margin-bottom: 10px; }
@@ -108,7 +115,6 @@
         .btn-main:active { box-shadow: var(--btn-active-matte); transform: scale(0.985); background: var(--primary-dark); }
         .btn-secondary { background: transparent; color: var(--text-dim); border: none; padding: 15px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; margin-top: 10px; }
 
-        /* Overlays */
         .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 2000; display: none; padding: 25px; overflow-y: auto; }
         .overlay-content { max-width: 550px; margin: 30px auto; background: var(--surface); border-radius: 45px; padding: 40px; box-shadow: var(--out-shadow); text-align: center; }
 
@@ -118,35 +124,11 @@
         .history-item .h-meta { font-size: 0.7rem; color: var(--text-dim); display: block; margin-top: 4px; }
         .history-item .h-val { font-weight: 800; font-size: 1rem; color: var(--primary); }
 
-        .day-group { margin-bottom: 25px; border-bottom: 2px solid var(--light-shadow); padding-bottom: 15px; }
-        .day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .day-header .d-title { font-weight: 800; font-size: 0.85rem; text-transform: uppercase; color: var(--text); }
-        .day-header .d-stats { font-size: 0.7rem; color: var(--text-dim); font-weight: 600; }
-
-        .total-exp-header { background: var(--in-shadow); padding: 20px; border-radius: 20px; margin-bottom: 25px; }
-        .total-exp-header .l { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-bottom: 5px; }
-        .total-exp-header .v { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
-
-        .proj-table-header { display: flex; justify-content: space-between; padding: 0 10px 15px 10px; border-bottom: 2px solid var(--light-shadow); margin-bottom: 10px; }
-        .proj-table-header span { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); }
-
-        .proj-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 10px; border-bottom: 1px solid #1A1A1A; }
-        .proj-row .day-name { font-weight: 600; color: var(--text); font-size: 0.9rem; text-align: left; }
-        .proj-row .cur-val { font-weight: 800; color: var(--primary); display: block; font-size: 1.1rem; text-align: right; }
-        .proj-row .orig-val { font-size: 0.7rem; color: var(--text-dim); text-align: right; }
-
         /* Manual Styles */
         .guide-section { text-align: left; margin-bottom: 35px; }
         .guide-section h3 { font-size: 0.9rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-left: 3px solid var(--primary); padding-left: 10px; }
         .guide-step { margin-bottom: 18px; padding-left: 10px; border-left: 1px solid var(--light-shadow); position: relative; }
-        
-        .guide-step .step-title { 
-            color: var(--text); 
-            font-size: 0.85rem; 
-            font-weight: 700;
-            display: block; 
-            margin-bottom: 3px; 
-        }
+        .guide-step .step-title { color: var(--text); font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 3px; }
         .guide-step p { font-size: 0.75rem; color: var(--text-dim); line-height: 1.5; margin: 0; }
         .guide-step p b { color: var(--text); font-weight: 700; }
 
@@ -157,6 +139,9 @@
         .form-group { margin-bottom: 25px; text-align: left; }
         .form-group label { display: block; font-size: 0.65rem; color: var(--text-dim); margin-bottom: 12px; text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; }
         input[type="text"], input[type="number"], select { width: 100%; background: var(--surface); border: none; box-shadow: var(--in-shadow); color: white; padding: 18px 22px; border-radius: 18px; font-size: 1rem; outline: none; }
+        
+        /* Fixed Velocity Grid for Mobile */
+        .compact-input { padding: 12px 2px !important; text-align: center; font-size: 0.8rem !important; border-radius: 12px !important; }
 
         #notification { position: fixed; top: 50px; left: 30px; right: 30px; max-width: 400px; margin: 0 auto; padding: 20px 30px; border-radius: 25px; background: var(--danger); color: #FFF; font-weight: 800; display: none; z-index: 3000; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.8); animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes slideIn { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -170,7 +155,6 @@
     <div id="notification"></div>
 
     <div class="container">
-        <!-- Header Meta -->
         <div class="top-meta">
             <div class="meta-line-1">
                 <div id="display-date">...</div>
@@ -182,7 +166,6 @@
                 </div>
             </div>
             
-            <!-- Greeting Area -->
             <div class="brand-greeting-row">
                 <div class="greeting-stack">
                     <div id="greeting-line1" class="user-greeting-line1">Hi User,</div>
@@ -254,7 +237,7 @@
         </footer>
     </div>
 
-    <!-- MANUAL OVERLAY -->
+    <!-- MANUAL -->
     <div id="howto-overlay" class="overlay">
         <div class="overlay-content">
             <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('howto-overlay')">✕</span>
@@ -264,67 +247,35 @@
                 <h3>Settings (⚙️)</h3>
                 <div class="guide-step">
                     <span class="step-title">Identifier</span>
-                    <p>Enter your name to personalize your greeting (e.g., Hi Saptarshi).</p>
+                    <p>Enter your name to personalize your greeting line.</p>
                 </div>
                 <div class="guide-step">
                     <span class="step-title">Currency</span>
-                    <p>Select your preferred currency symbol (₹, $, €, £) which will be applied globally across all cards and forecasts.</p>
+                    <p>Select your currency symbol (₹, $, €, £) applied globally across the app.</p>
                 </div>
                 <div class="guide-step">
                     <span class="step-title">Policy (Reset Time)</span>
-                    <p>Defines when your day starts. "Indian" triggers reset at 6:00 AM daily, while "Global" resets at Midnight (00:00).</p>
+                    <p>Defines the start of your financial day. Indian policy triggers at 6:00 AM, while International resets at Midnight.</p>
                 </div>
                 <div class="guide-step">
                     <span class="step-title">Safety Liquidity Floor (Min x)</span>
                     <p>Sets a hard reserve. The app determines your minimum reserve by combining your 'Min x' value with the weights of the remaining days in the month. It will block any transaction that causes your total pool to dip into this reserve.</p>
                 </div>
                 <div class="guide-step">
-                    <span class="step-title">Velocity Weights (Monday to Sunday)</span>
-                    <p>Distribute your monthly pool by defining ratios or weights for each day of the week. Use higher numbers for days you spend more (e.g., 2.0 for weekends) to shift more budget to those specific days while keeping the math balanced.</p>
+                    <span class="step-title">Velocity Weights (Mon - Sun)</span>
+                    <p>Distribute your monthly pool by defining ratios or weights for each day of the week. Use higher numbers for days you spend more (e.g., 2.0 for weekends) to shift more budget to those specific days.</p>
                 </div>
             </div>
 
             <div class="guide-section">
-                <h3>Main Dashboard</h3>
+                <h3>Dashboard Logic</h3>
                 <div class="guide-step">
                     <span class="step-title">Next-Day Reset</span>
-                    <p>The system resets automatically in real-time when the "Reset In" clock hits zero. It archives yesterday's performance and calculates your new limit instantly without a page refresh.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">Limit Today vs Original Budget</span>
-                    <p>The Original Budget is your static target. Limit Today is dynamic—it grows if you saved money previously and shrinks if you created debt.</p>
+                    <p>The system resets automatically in real-time when the "Reset In" clock hits zero. It archives yesterday's performance and calculates your new limit instantly.</p>
                 </div>
                 <div class="guide-step">
                     <span class="step-title">Safety Halt</span>
-                    <p>A red notification that appears if you attempt to spend money reserved by your Safety Liquidity Floor.</p>
-                </div>
-            </div>
-
-            <div class="guide-section">
-                <h3>Action Buttons</h3>
-                <div class="guide-step">
-                    <span class="step-title">Add Funds</span>
-                    <p>Mid-month top-ups are spread evenly across all remaining days to boost your future spending power.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">Liquidity Forecast</span>
-                    <p>A day-by-day projection showing exactly how much you can spend until the end of the month based on your current balance.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">History Logs</span>
-                    <p>Track fund additions and daily spend habits. These are cycle-locked and reset when you start a "New Month".</p>
-                </div>
-            </div>
-
-            <div class="guide-section">
-                <h3>Installation (PWA)</h3>
-                <div class="guide-step">
-                    <span class="step-title">Android (Chrome)</span>
-                    <p>Tap (⋮) in the corner and select "Install app" or "Add to Home screen".</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">iOS / iPhone (Safari)</span>
-                    <p>Tap the "Share" icon (square with arrow) and select "Add to Home Screen".</p>
+                    <p>A safety mechanism that blocks transactions if they would breach your protected minimum liquidity floor.</p>
                 </div>
             </div>
 
@@ -332,29 +283,7 @@
         </div>
     </div>
 
-    <!-- FUND HISTORY OVERLAY -->
-    <div id="fund-history-overlay" class="overlay">
-        <div class="overlay-content">
-            <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('fund-history-overlay')">✕</span>
-            <h2 style="margin-bottom: 20px; font-weight: 800;">Fund History</h2>
-            <div id="fund-history-list" class="history-list"></div>
-        </div>
-    </div>
-
-    <!-- SPEND HISTORY OVERLAY -->
-    <div id="spend-history-overlay" class="overlay">
-        <div class="overlay-content">
-            <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('spend-history-overlay')">✕</span>
-            <h2 style="margin-bottom: 20px; font-weight: 800;">Spend History</h2>
-            <div class="total-exp-header">
-                <div class="l">Total Monthly Expenditure</div>
-                <div class="v" id="total-spend-val">0.00</div>
-            </div>
-            <div id="spend-history-list" class="history-list"></div>
-        </div>
-    </div>
-
-    <!-- SETTINGS -->
+    <!-- SETTINGS OVERLAY -->
     <div id="settings-overlay" class="overlay">
         <div class="overlay-content">
             <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('settings-overlay')">✕</span>
@@ -377,37 +306,54 @@
                 </select>
             </div>
             <div class="form-group"><label>Safety Liquidity Floor (Min x)</label><input type="number" id="set-threshold" step="0.5" inputmode="decimal"></div>
-            <div class="form-group"><label>Velocity Weights (Mon-Sun)</label><div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;"><input type="number" id="r0" inputmode="decimal"><input type="number" id="r1" inputmode="decimal"><input type="number" id="r2" inputmode="decimal"><input type="number" id="r3" inputmode="decimal"><input type="number" id="r4" inputmode="decimal"><input type="number" id="r5" inputmode="decimal"><input type="number" id="r6" inputmode="decimal"></div></div>
+            <div class="form-group">
+                <label>Velocity Weights (Mon-Sun)</label>
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;">
+                    <input type="number" id="r0" class="compact-input" inputmode="decimal" placeholder="M">
+                    <input type="number" id="r1" class="compact-input" inputmode="decimal" placeholder="T">
+                    <input type="number" id="r2" class="compact-input" inputmode="decimal" placeholder="W">
+                    <input type="number" id="r3" class="compact-input" inputmode="decimal" placeholder="T">
+                    <input type="number" id="r4" class="compact-input" inputmode="decimal" placeholder="F">
+                    <input type="number" id="r5" class="compact-input" inputmode="decimal" placeholder="S">
+                    <input type="number" id="r6" class="compact-input" inputmode="decimal" placeholder="S">
+                </div>
+            </div>
             <button class="btn-main" onclick="saveSettings()">Sync System</button>
         </div>
     </div>
 
+    <!-- OTHER OVERLAYS -->
     <div id="projection-overlay" class="overlay">
         <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('projection-overlay')">✕</span><h2 style="margin-bottom: 20px;">Liquidity Forecast</h2><div class="proj-table-header"><span>Date</span><span>Projected Limit</span></div><div id="projection-list"></div></div>
     </div>
-
+    <div id="fund-history-overlay" class="overlay">
+        <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('fund-history-overlay')">✕</span><h2 style="margin-bottom: 20px;">Fund History</h2><div id="fund-history-list" class="history-list"></div></div>
+    </div>
+    <div id="spend-history-overlay" class="overlay">
+        <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('spend-history-overlay')">✕</span><h2 style="margin-bottom: 20px;">Spend History</h2><div class="total-exp-header"><div class="l">Total Monthly Expenditure</div><div class="v" id="total-spend-val">0.00</div></div><div id="spend-history-list" class="history-list"></div></div>
+    </div>
     <div id="adhoc-overlay" class="overlay">
         <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('adhoc-overlay')">✕</span><h2 style="margin-bottom: 25px;">Top-up Funds</h2><div class="form-group"><label>Amount to Add</label><input type="number" id="input-adhoc" placeholder="0.00" inputmode="decimal"></div><button class="btn-main" onclick="handleAdHoc()">Top Up Global Pool</button></div>
     </div>
-
     <div id="sync-confirm-overlay" class="overlay">
         <div class="overlay-content" style="max-width: 400px; padding: 50px 30px;"><div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div><h2 style="margin-bottom: 15px; font-weight: 800;">Are you sure you want to start a new month?</h2><p style="color: var(--text-dim); font-size: 0.85rem; line-height: 1.6; margin-bottom: 35px;">Starting a new month will remove the old limits and tracking data. This action cannot be undone.</p><button class="btn-main" onclick="confirmResetAndOpenInit()">Yes, Proceed</button><button class="btn-secondary" onclick="closeOverlay('sync-confirm-overlay')">Cancel</button></div>
     </div>
-
     <div id="init-overlay" class="overlay">
         <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('init-overlay')">✕</span><h2 style="margin-bottom: 25px;">Initialize Cycle</h2><div class="form-group"><label>Starting Monthly Pool</label><input type="number" id="input-init-pool" placeholder="0.00" inputmode="decimal"></div><button class="btn-main" onclick="initializeMonth()">Set Nero Sync</button></div>
     </div>
 
     <script>
-        // --- DATA PERSISTENCE ---
-        let state = JSON.parse(localStorage.getItem('nero_spend_foe_v7')) || {
-            name: "", currency: "₹", policy: "indian", pool: 0, threshold: 0,
-            ratios: [1, 1, 1, 1, 1, 2, 2], templates: [], lockedAllowance: 0,
+        // --- CORE STATE ---
+        let state = JSON.parse(localStorage.getItem('nero_spend_foe_v8')) || {
+            name: "", currency: "₹", policy: "indian", pool: 0, 
+            threshold: 1.0, 
+            ratios: [1, 1, 1, 1, 1, 2, 2], 
+            templates: [], lockedAllowance: 0,
             dailyBaselinePool: 0, spentToday: 0, lastResetDate: null,
             fundHistory: [], spendHistory: [], dailyStats: []
         };
 
-        const save = () => { localStorage.setItem('nero_spend_foe_v7', JSON.stringify(state)); refreshUI(); };
+        const save = () => { localStorage.setItem('nero_spend_foe_v8', JSON.stringify(state)); refreshUI(); };
         const getEffectiveDate = () => { let now = new Date(); if (state.policy === 'indian') now.setHours(now.getHours() - 6); return now; };
         const validateNumeric = (val, field) => { if (val === "" || isNaN(parseFloat(val))) { notify(`Entry Error: ${field} requires numbers`, "danger"); return false; } return true; };
 
@@ -451,9 +397,12 @@
             if (!validateNumeric(raw, "Amount")) return;
             const val = parseFloat(raw);
             if (val <= 0) return;
-            const remUnits = getRemainingUnits(true);
-            const safety = state.threshold * remUnits;
-            if ((state.pool - val) < (safety - 0.01)) { notify(`Safety Halt: Max spendable is ${state.currency}${(state.pool - safety).toFixed(2)}`, "danger"); return; }
+            const safety = state.threshold * getRemainingUnits(true);
+            if ((state.pool - val) < (safety - 0.01)) { 
+                const maxAvailable = Math.max(0, state.pool - safety);
+                notify(`Safety Halt: Max spendable is ${state.currency}${maxAvailable.toFixed(2)}`, "danger"); 
+                return; 
+            }
             state.spentToday += val;
             state.pool -= val;
             state.spendHistory.push({ amount: val, date: new Date().toISOString() });
@@ -517,7 +466,10 @@
                 document.getElementById('set-currency').value = state.currency;
                 document.getElementById('set-policy').value = state.policy;
                 document.getElementById('set-threshold').value = state.threshold;
-                state.ratios.forEach((r, i) => document.getElementById(`r${i}`).value = r);
+                state.ratios.forEach((r, i) => {
+                    const el = document.getElementById('r' + i);
+                    if (el) el.value = r;
+                });
             } else if (id === 'projection-overlay') renderProjection();
             else if (id === 'fund-history-overlay') renderFundHistory();
             else if (id === 'spend-history-overlay') renderSpendHistory();
