@@ -227,7 +227,7 @@
         </div>
 
         <footer class="footer">
-            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.0.2</div>
+            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.0.3</div>
         </footer>
     </div>
 
@@ -252,12 +252,12 @@
                     <p>Defines the start of your financial day. Indian policy triggers at 6:00 AM, while International resets at Midnight.</p>
                 </div>
                 <div class="guide-step">
-                    <span class="step-title">Safety Liquidity Floor (Min <span class="dynamic-currency">₹</span>)</span>
-                    <p>Sets a hard reserve. The app determines your minimum reserve by combining your 'Min <span class="dynamic-currency">₹</span>' value with the weights of the remaining days in the month.</p>
+                    <span class="step-title">Safety Liquidity Floor (Min Amount)</span>
+                    <p>Sets a hard reserve. The app determines your minimum reserve by combining your 'Min Amount' value with the weights of the remaining days in the month. It will block any transaction that causes your total pool to dip into this reserve.</p>
                 </div>
                 <div class="guide-step">
                     <span class="step-title">Velocity Weights (Mon - Sun)</span>
-                    <p>Distribute your monthly pool by defining ratios or weights for each day of the week.</p>
+                    <p>Distribute your monthly pool by defining ratios or weights for each day of the week. Use higher numbers for days you spend more (e.g., 2.0 for weekends) to shift more budget to those specific days.</p>
                 </div>
             </div>
 
@@ -265,11 +265,23 @@
                 <h3>Dashboard Logic</h3>
                 <div class="guide-step">
                     <span class="step-title">Next-Day Reset</span>
-                    <p>The system resets automatically in real-time when the "Reset In" clock hits zero.</p>
+                    <p>The system resets automatically in real-time when the "Reset In" clock hits zero. It archives yesterday's performance and calculates your new limit instantly.</p>
                 </div>
                 <div class="guide-step">
                     <span class="step-title">Safety Halt</span>
                     <p>A safety mechanism that blocks transactions if they would breach your protected minimum liquidity floor.</p>
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <h3>Installation</h3>
+                <div class="guide-step">
+                    <span class="step-title">Android (Chrome)</span>
+                    <p>Tap (⋮) and select "Install app" or "Add to Home screen".</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">iOS (Safari)</span>
+                    <p>Tap "Share" and select "Add to Home Screen".</p>
                 </div>
             </div>
 
@@ -296,6 +308,9 @@
                     <option value="S$">S$ SGD</option>
                     <option value="¥">¥ JPY</option>
                     <option value="CN¥">CN¥ CNY</option>
+                    <option value="HK$">HK$ HKD</option>
+                    <option value="Fr">Fr CHF</option>
+                    <option value="NZ$">NZ$ NZD</option>
                 </select>
             </div>
             <div class="form-group">
@@ -305,7 +320,7 @@
                     <option value="intl">Global (Midnight Reset)</option>
                 </select>
             </div>
-            <div class="form-group"><label>Safety Liquidity Floor (Min <span class="dynamic-currency">₹</span>)</label><input type="number" id="set-threshold" step="0.5" inputmode="decimal"></div>
+            <div class="form-group"><label>Safety Liquidity Floor (Min Amount)</label><input type="number" id="set-threshold" step="0.5" inputmode="decimal"></div>
             <div class="form-group">
                 <label>Velocity Weights (Mon-Sun)</label>
                 <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;">
@@ -357,9 +372,11 @@
         const getEffectiveDate = () => { let now = new Date(); if (state.policy === 'indian') now.setHours(now.getHours() - 6); return now; };
         const validateNumeric = (val, field) => { if (val === "" || isNaN(parseFloat(val))) { notify(`Entry Error: ${field} requires numbers`, "danger"); return false; } return true; };
 
-        // Real-time currency labels update
+        // Real-time currency labels update function
         const updateDynamicCurrencyLabels = (newCurrency) => {
-            document.querySelectorAll('.dynamic-currency').forEach(el => el.innerText = newCurrency);
+            document.querySelectorAll('.dynamic-currency').forEach(el => {
+                el.innerText = newCurrency;
+            });
         };
 
         const getRemainingUnits = (includeToday) => {
@@ -471,7 +488,7 @@
                 document.getElementById('set-currency').value = state.currency;
                 document.getElementById('set-policy').value = state.policy;
                 document.getElementById('set-threshold').value = state.threshold;
-                updateDynamicCurrencyLabels(state.currency); // Ensure labels match saved state
+                updateDynamicCurrencyLabels(state.currency); 
                 state.ratios.forEach((r, i) => {
                     const el = document.getElementById('r' + i);
                     if (el) el.value = r;
@@ -560,7 +577,6 @@
             document.getElementById('val-available').style.color = leftover < -0.01 ? 'var(--danger)' : 'var(--primary)';
             document.getElementById('overspend-status-text').style.display = leftover < -0.01 ? 'block' : 'none';
             
-            // Initial sync for labels
             updateDynamicCurrencyLabels(state.currency);
 
             const ql = document.getElementById('quick-logs');
