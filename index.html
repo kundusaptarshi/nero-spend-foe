@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Nero Spend Foe | Elite Liquidity Manager</title>
+    <title>NeroSpendFoe | Elite Liquidity Manager</title>
     <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,7 +75,6 @@
         .user-greeting-line1 { font-size: 0.85rem; font-weight: 500; color: var(--text); letter-spacing: 0.2px; }
         .user-greeting-line2 { font-size: 0.85rem; font-weight: 500; color: var(--text-dim); letter-spacing: 0.2px; }
         
-        /* Non-button Logo Styling */
         .logo-container { width: 48px; height: 48px; border-radius: 12px; background: transparent; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; padding: 4px; }
         .app-logo-small { width: 100%; height: 100%; object-fit: contain; }
         .logo-fallback { display: none; color: var(--primary); font-size: 1.1rem; font-weight: 900; }
@@ -115,6 +114,7 @@
         .btn-main:active { box-shadow: var(--btn-active-matte); transform: scale(0.985); background: var(--primary-dark); }
         .btn-secondary { background: transparent; color: var(--text-dim); border: none; padding: 15px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; margin-top: 10px; }
 
+        /* Overlays */
         .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 2000; display: none; padding: 25px; overflow-y: auto; }
         .overlay-content { max-width: 550px; margin: 30px auto; background: var(--surface); border-radius: 45px; padding: 40px; box-shadow: var(--out-shadow); text-align: center; }
 
@@ -132,15 +132,15 @@
         .guide-step p { font-size: 0.75rem; color: var(--text-dim); line-height: 1.5; margin: 0; }
         .guide-step p b { color: var(--text); font-weight: 700; }
 
-        /* Footer Professional Styles */
+        /* Footer */
         .footer { margin-top: 80px; text-align: center; padding: 40px 0 20px 0; border-top: 1px solid rgba(255,255,255,0.05); }
         .footer-text { font-size: 0.55rem; color: var(--text-dim); font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; opacity: 0.5; }
 
+        /* Form Controls */
         .form-group { margin-bottom: 25px; text-align: left; }
         .form-group label { display: block; font-size: 0.65rem; color: var(--text-dim); margin-bottom: 12px; text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; }
         input[type="text"], input[type="number"], select { width: 100%; background: var(--surface); border: none; box-shadow: var(--in-shadow); color: white; padding: 18px 22px; border-radius: 18px; font-size: 1rem; outline: none; }
         
-        /* Fixed Velocity Grid for Mobile */
         .compact-input { padding: 12px 2px !important; text-align: center; font-size: 0.8rem !important; border-radius: 12px !important; }
 
         #notification { position: fixed; top: 50px; left: 30px; right: 30px; max-width: 400px; margin: 0 auto; padding: 20px 30px; border-radius: 25px; background: var(--danger); color: #FFF; font-weight: 800; display: none; z-index: 3000; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.8); animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -155,6 +155,7 @@
     <div id="notification"></div>
 
     <div class="container">
+        <!-- Header -->
         <div class="top-meta">
             <div class="meta-line-1">
                 <div id="display-date">...</div>
@@ -169,7 +170,7 @@
             <div class="brand-greeting-row">
                 <div class="greeting-stack">
                     <div id="greeting-line1" class="user-greeting-line1">Hi User,</div>
-                    <div class="user-greeting-line2">Welcome to Nero Spend Foe.</div>
+                    <div class="user-greeting-line2">Welcome to NeroSpendFoe.</div>
                 </div>
                 <div class="logo-container">
                     <img id="app-logo" src="Gemini_Generated_Image_kggd5tkggd5tkggd.png" 
@@ -233,7 +234,7 @@
         </div>
 
         <footer class="footer">
-            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.0.0</div>
+            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.0.1</div>
         </footer>
     </div>
 
