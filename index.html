@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Nero Spend Foe | Elite Liquidity Manager</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        /**
+         * Global error handler for the logo image. 
+         * Defined in head to ensure availability before image parsing.
+         */
+        function handleLogoError(img) {
+            img.style.display = 'none';
+            var fallback = document.getElementById('logo-icon-fallback');
+            if (fallback) fallback.style.display = 'block';
+        }
+    </script>
+
+    <style>
+        :root {
+            /* Matte Onyx Palette */
+            --bg: #121212;
+            --surface: #121212;
+            --light-shadow: #1D1D1D;
+            --dark-shadow: #000000;
+            
+            --primary: #FF8243; 
+            --primary-dark: #D15B22;
+            --accent: #E0E0E0;  
+            --danger: #E8083E; 
+            --text: #FFFFFF;
+            --text-dim: #707070; 
+            
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            
+            /* Tactile Shadows */
+            --out-shadow: -5px -5px 12px var(--light-shadow), 5px 5px 12px var(--dark-shadow);
+            --in-shadow: inset -3px -3px 8px var(--light-shadow), inset 3px 3px 8px var(--dark-shadow);
+            --btn-active: inset -2px -2px 5px var(--light-shadow), inset 2px 2px 5px var(--dark-shadow);
+            
+            --out-shadow-matte: -4px -4px 10px rgba(255, 255, 255, 0.03), 5px 5px 12px var(--dark-shadow);
+            --btn-active-matte: inset 3px 3px 10px rgba(0, 0, 0, 0.5), inset -2px -2px 5px rgba(255, 255, 255, 0.05);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; overflow-x: hidden; min-height: 100vh; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: calc(20px + var(--safe-top)) 24px calc(25px + var(--safe-bottom)) 24px; }
+
+        /* Top Header Meta */
+        .top-meta { margin-bottom: 25px; }
+        .meta-line-1 { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 15px; font-weight: 500; }
+        .meta-right { display: flex; align-items: center; gap: 10px; }
+        #display-timer { font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; font-weight: 600; }
+
+        /* Brand Greeting Area */
+        .brand-greeting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .greeting-stack { display: flex; flex-direction: column; gap: 2px; }
+        .user-greeting-line1 { font-size: 0.85rem; font-weight: 500; color: var(--text); letter-spacing: 0.2px; }
+        .user-greeting-line2 { font-size: 0.85rem; font-weight: 500; color: var(--text-dim); letter-spacing: 0.2px; }
+        
+        .logo-container { width: 48px; height: 48px; border-radius: 12px; background: var(--surface); box-shadow: var(--out-shadow); display: flex; align-items: center; justify-content: center; padding: 6px; }
+        .app-logo-small { width: 100%; height: 100%; object-fit: contain; }
+        .logo-fallback { display: none; color: var(--primary); font-size: 1.1rem; font-weight: 900; }
+
+        .dashboard-main { display: grid; grid-template-columns: 1.6fr 1fr; gap: 25px; margin-bottom: 30px; }
+
+        /* Log Section */
+        .log-section { background: var(--surface); padding: 35px 30px; border-radius: 40px; box-shadow: var(--out-shadow); text-align: left; display: flex; flex-direction: column; justify-content: space-between; }
+        .log-section h2 { font-size: 0.8rem; color: var(--text); text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2.5px; font-weight: 800; }
+        .input-recess { background: var(--surface); border-radius: 20px; box-shadow: var(--in-shadow); padding: 15px 25px; margin-bottom: 25px; }
+        #input-spend { background: transparent; border: none; color: var(--primary); font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 800; width: 100%; text-align: left; outline: none; }
+
+        .template-save { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; font-size: 0.8rem; color: var(--text-dim); }
+        #input-template-name { width: 120px; box-shadow: var(--in-shadow); border: none; background: var(--surface); border-radius: 8px; padding: 6px 12px; color: #FFFFFF; font-family: 'Inter', sans-serif; font-size: 0.8rem; outline: none; }
+        .template-save input[type="checkbox"] { width: 18px; height: 18px; border-radius: 6px; background: var(--surface); box-shadow: var(--in-shadow); appearance: none; cursor: pointer; position: relative; }
+        .template-save input[type="checkbox"]:checked::after { content: "✓"; position: absolute; left: 3px; top: -1px; color: var(--primary); font-weight: 900; font-size: 14px; }
+
+        .quick-logs { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 25px; }
+        .quick-btn { background: var(--surface); border: none; color: var(--text-dim); padding: 12px 20px; border-radius: 16px; font-size: 0.75rem; font-weight: 600; cursor: pointer; box-shadow: var(--out-shadow); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .quick-btn:active { box-shadow: var(--btn-active); transform: scale(0.98); color: var(--primary); }
+
+        /* Stats Sidebar */
+        .stats-sidebar { display: flex; flex-direction: column; gap: 20px; }
+        .stat-card { background: var(--surface); padding: 28px; border-radius: 35px; box-shadow: var(--out-shadow); display: flex; flex-direction: column; justify-content: center; flex: 1; }
+        .stat-card .label { font-size: 0.8rem; color: var(--text); text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; margin-bottom: 10px; }
+        .stat-card .val { font-size: clamp(1.4rem, 3.5vw, 2rem); font-weight: 800; margin: 5px 0; color: var(--primary); transition: color 0.3s ease; }
+        .stat-card .sub-val { font-size: 0.7rem; color: var(--text-dim); font-weight: 600; }
+        .card-warning-text { color: var(--danger); font-size: 0.65rem; font-weight: 700; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: none; line-height: 1.3; }
+
+        .home-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .action-btn { background: var(--surface); box-shadow: var(--out-shadow); color: var(--text); padding: 22px; border-radius: 25px; cursor: pointer; border: none; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 0.9rem; transition: all 0.2s ease; }
+        .action-btn:active { box-shadow: var(--btn-active); transform: scale(0.97); }
+
+        .header-icon { width: 38px; height: 38px; background: var(--surface); box-shadow: var(--out-shadow); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; transition: all 0.2s ease; color: var(--text-dim); }
+        .header-icon:active { box-shadow: var(--btn-active); color: var(--primary); }
+
+        .btn-main { background: var(--primary); color: #000000; font-weight: 800; border: none; width: 100%; padding: 22px; border-radius: 24px; cursor: pointer; font-size: 0.9rem; box-shadow: var(--out-shadow-matte); text-transform: uppercase; letter-spacing: 2px; transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+        .btn-main::after { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.08); pointer-events: none; }
+        .btn-main:active { box-shadow: var(--btn-active-matte); transform: scale(0.985); background: var(--primary-dark); }
+        .btn-secondary { background: transparent; color: var(--text-dim); border: none; padding: 15px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; margin-top: 10px; }
+
+        /* Overlays */
+        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 2000; display: none; padding: 25px; overflow-y: auto; }
+        .overlay-content { max-width: 550px; margin: 30px auto; background: var(--surface); border-radius: 45px; padding: 40px; box-shadow: var(--out-shadow); text-align: center; }
+
+        .history-list { text-align: left; margin-top: 20px; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #1a1a1a; }
+        .history-item .h-label { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+        .history-item .h-meta { font-size: 0.7rem; color: var(--text-dim); display: block; margin-top: 4px; }
+        .history-item .h-val { font-weight: 800; font-size: 1rem; color: var(--primary); }
+
+        .day-group { margin-bottom: 25px; border-bottom: 2px solid var(--light-shadow); padding-bottom: 15px; }
+        .day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .day-header .d-title { font-weight: 800; font-size: 0.85rem; text-transform: uppercase; color: var(--text); }
+        .day-header .d-stats { font-size: 0.7rem; color: var(--text-dim); font-weight: 600; }
+
+        .total-exp-header { background: var(--in-shadow); padding: 20px; border-radius: 20px; margin-bottom: 25px; }
+        .total-exp-header .l { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-bottom: 5px; }
+        .total-exp-header .v { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+
+        .proj-table-header { display: flex; justify-content: space-between; padding: 0 10px 15px 10px; border-bottom: 2px solid var(--light-shadow); margin-bottom: 10px; }
+        .proj-table-header span { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); }
+
+        .proj-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 10px; border-bottom: 1px solid #1A1A1A; }
+        .proj-row .day-name { font-weight: 600; color: var(--text); font-size: 0.9rem; text-align: left; }
+        .proj-row .cur-val { font-weight: 800; color: var(--primary); display: block; font-size: 1.1rem; text-align: right; }
+        .proj-row .orig-val { font-size: 0.7rem; color: var(--text-dim); text-align: right; }
+
+        /* Manual Styles */
+        .guide-section { text-align: left; margin-bottom: 35px; }
+        .guide-section h3 { font-size: 0.9rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-left: 3px solid var(--primary); padding-left: 10px; }
+        .guide-step { margin-bottom: 18px; padding-left: 10px; border-left: 1px solid var(--light-shadow); position: relative; }
+        
+        .guide-step .step-title { 
+            color: var(--text); 
+            font-size: 0.85rem; 
+            font-weight: 700;
+            display: block; 
+            margin-bottom: 3px; 
+        }
+        .guide-step p { font-size: 0.75rem; color: var(--text-dim); line-height: 1.5; margin: 0; }
+        .guide-step p b { color: var(--text); font-weight: 700; }
+
+        /* Footer Professional Styles */
+        .footer { margin-top: 80px; text-align: center; padding: 40px 0 20px 0; border-top: 1px solid rgba(255,255,255,0.05); }
+        .footer-text { font-size: 0.55rem; color: var(--text-dim); font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; opacity: 0.5; }
+
+        .form-group { margin-bottom: 25px; text-align: left; }
+        .form-group label { display: block; font-size: 0.65rem; color: var(--text-dim); margin-bottom: 12px; text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; }
+        input[type="text"], input[type="number"], select { width: 100%; background: var(--surface); border: none; box-shadow: var(--in-shadow); color: white; padding: 18px 22px; border-radius: 18px; font-size: 1rem; outline: none; }
+
+        #notification { position: fixed; top: 50px; left: 30px; right: 30px; max-width: 400px; margin: 0 auto; padding: 20px 30px; border-radius: 25px; background: var(--danger); color: #FFF; font-weight: 800; display: none; z-index: 3000; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.8); animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes slideIn { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .hidden { display: none; }
+        @media (max-width: 768px) { .dashboard-main { grid-template-columns: 1fr; } .stats-sidebar { flex-direction: row; } }
+    </style>
+</head>
+<body>
+
+    <div id="notification"></div>
+
+    <div class="container">
+        <!-- Header Meta -->
+        <div class="top-meta">
+            <div class="meta-line-1">
+                <div id="display-date">...</div>
+                <div class="meta-right">
+                    <div id="display-timer-label">Reset In:</div>
+                    <div id="display-timer">...</div>
+                    <div class="header-icon" onclick="openOverlay('howto-overlay')" style="font-size: 0.8rem; font-weight: 900;">?</div>
+                    <div class="header-icon" onclick="openOverlay('settings-overlay')">⚙️</div>
+                </div>
+            </div>
+            
+            <!-- Greeting Area -->
+            <div class="brand-greeting-row">
+                <div class="greeting-stack">
+                    <div id="greeting-line1" class="user-greeting-line1">Hi User,</div>
+                    <div class="user-greeting-line2">Welcome to Nero Spend Foe.</div>
+                </div>
+                <div class="logo-container">
+                    <img id="app-logo" src="Gemini_Generated_Image_kggd5tkggd5tkggd.png" 
+                         alt="Logo" class="app-logo-small" onerror="handleLogoError(this)">
+                    <span id="logo-icon-fallback" class="logo-fallback">NSF</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-main">
+            <div class="log-section">
+                <h2>Transaction</h2>
+                <div class="input-recess">
+                    <input type="number" id="input-spend" placeholder="0.00" step="0.01" inputmode="decimal">
+                </div>
+                <div class="template-save">
+                    <input type="checkbox" id="check-save-template">
+                    <label for="check-save-template">Save Shortcut</label>
+                    <input type="text" id="input-template-name" placeholder="Name" class="hidden">
+                </div>
+                <div id="quick-logs" class="quick-logs"></div>
+                <button class="btn-main" onclick="handleSpending()">Confirm Spend</button>
+            </div>
+
+            <div class="stats-sidebar">
+                <div class="stat-card" id="card-available">
+                    <div class="label">Limit Today</div>
+                    <div class="val" id="val-available">0.00</div>
+                    <div class="sub-val">Original Budget: <span id="val-original-daily">0.00</span></div>
+                </div>
+                <div class="stat-card" id="card-spent">
+                    <div class="label">Spent Today</div>
+                    <div class="val" id="val-spent">0.00</div>
+                    <div class="sub-val">Total Pool Remaining: <span id="val-total-pool">0.00</span></div>
+                    <div id="overspend-status-text" class="card-warning-text">Budget exceeded. Liquidity Forecast adjusted.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="home-actions">
+            <div class="action-btn" onclick="openOverlay('adhoc-overlay')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                Add Funds
+            </div>
+            <div class="action-btn" onclick="openOverlay('projection-overlay')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 3v18h18M7 16l4-4 4 4 6-6"/></svg>
+                Liquidity Forecast
+            </div>
+            <div class="action-btn" onclick="openOverlay('fund-history-overlay')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h7M16 19h6M19 16l3 3-3 3M13 10H7M10 14H7"/></svg>
+                Fund History
+            </div>
+            <div class="action-btn" onclick="openOverlay('spend-history-overlay')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Spend History
+            </div>
+            <div class="action-btn" onclick="openOverlay('sync-confirm-overlay')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM3 10h18"/></svg>
+                New Month
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.0.0</div>
+        </footer>
+    </div>
+
+    <!-- MANUAL OVERLAY -->
+    <div id="howto-overlay" class="overlay">
+        <div class="overlay-content">
+            <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('howto-overlay')">✕</span>
+            <h2 style="margin-bottom: 30px; font-weight: 800; color: var(--primary-dark);">Manual</h2>
+            
+            <div class="guide-section">
+                <h3>Settings (⚙️)</h3>
+                <div class="guide-step">
+                    <span class="step-title">Identifier</span>
+                    <p>Enter your name to personalize your greeting (e.g., Hi Saptarshi).</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Currency</span>
+                    <p>Select your preferred currency symbol (₹, $, €, £) which will be applied globally across all cards and forecasts.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Policy (Reset Time)</span>
+                    <p>Defines when your day starts. "Indian" triggers reset at 6:00 AM daily, while "Global" resets at Midnight (00:00).</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Safety Liquidity Floor (Min x)</span>
+                    <p>Sets a hard reserve. The app determines your minimum reserve by combining your 'Min x' value with the weights of the remaining days in the month. It will block any transaction that causes your total pool to dip into this reserve.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Velocity Weights (Monday to Sunday)</span>
+                    <p>Distribute your monthly pool by defining ratios or weights for each day of the week. Use higher numbers for days you spend more (e.g., 2.0 for weekends) to shift more budget to those specific days while keeping the math balanced.</p>
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <h3>Main Dashboard</h3>
+                <div class="guide-step">
+                    <span class="step-title">Next-Day Reset</span>
+                    <p>The system resets automatically in real-time when the "Reset In" clock hits zero. It archives yesterday's performance and calculates your new limit instantly without a page refresh.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Limit Today vs Original Budget</span>
+                    <p>The Original Budget is your static target. Limit Today is dynamic—it grows if you saved money previously and shrinks if you created debt.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Safety Halt</span>
+                    <p>A red notification that appears if you attempt to spend money reserved by your Safety Liquidity Floor.</p>
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <h3>Action Buttons</h3>
+                <div class="guide-step">
+                    <span class="step-title">Add Funds</span>
+                    <p>Mid-month top-ups are spread evenly across all remaining days to boost your future spending power.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">Liquidity Forecast</span>
+                    <p>A day-by-day projection showing exactly how much you can spend until the end of the month based on your current balance.</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">History Logs</span>
+                    <p>Track fund additions and daily spend habits. These are cycle-locked and reset when you start a "New Month".</p>
+                </div>
+            </div>
+
+            <div class="guide-section">
+                <h3>Installation (PWA)</h3>
+                <div class="guide-step">
+                    <span class="step-title">Android (Chrome)</span>
+                    <p>Tap (⋮) in the corner and select "Install app" or "Add to Home screen".</p>
+                </div>
+                <div class="guide-step">
+                    <span class="step-title">iOS / iPhone (Safari)</span>
+                    <p>Tap the "Share" icon (square with arrow) and select "Add to Home Screen".</p>
+                </div>
+            </div>
+
+            <button class="btn-main" onclick="closeOverlay('howto-overlay')">Got It</button>
+        </div>
+    </div>
+
+    <!-- FUND HISTORY OVERLAY -->
+    <div id="fund-history-overlay" class="overlay">
+        <div class="overlay-content">
+            <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('fund-history-overlay')">✕</span>
+            <h2 style="margin-bottom: 20px; font-weight: 800;">Fund History</h2>
+            <div id="fund-history-list" class="history-list"></div>
+        </div>
+    </div>
+
+    <!-- SPEND HISTORY OVERLAY -->
+    <div id="spend-history-overlay" class="overlay">
+        <div class="overlay-content">
+            <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('spend-history-overlay')">✕</span>
+            <h2 style="margin-bottom: 20px; font-weight: 800;">Spend History</h2>
+            <div class="total-exp-header">
+                <div class="l">Total Monthly Expenditure</div>
+                <div class="v" id="total-spend-val">0.00</div>
+            </div>
+            <div id="spend-history-list" class="history-list"></div>
+        </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="settings-overlay" class="overlay">
+        <div class="overlay-content">
+            <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('settings-overlay')">✕</span>
+            <h2 style="margin-bottom: 30px;">Settings</h2>
+            <div class="form-group"><label>Identifier</label><input type="text" id="set-name" placeholder="User Name"></div>
+            <div class="form-group">
+                <label>Currency</label>
+                <select id="set-currency">
+                    <option value="₹">₹ INR</option>
+                    <option value="$">$ USD</option>
+                    <option value="€">€ EUR</option>
+                    <option value="£">£ GBP</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Reset Policy</label>
+                <select id="set-policy">
+                    <option value="indian">Indian (6:00 AM Reset)</option>
+                    <option value="intl">Global (Midnight Reset)</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Safety Liquidity Floor (Min x)</label><input type="number" id="set-threshold" step="0.5" inputmode="decimal"></div>
+            <div class="form-group"><label>Velocity Weights (Mon-Sun)</label><div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;"><input type="number" id="r0" inputmode="decimal"><input type="number" id="r1" inputmode="decimal"><input type="number" id="r2" inputmode="decimal"><input type="number" id="r3" inputmode="decimal"><input type="number" id="r4" inputmode="decimal"><input type="number" id="r5" inputmode="decimal"><input type="number" id="r6" inputmode="decimal"></div></div>
+            <button class="btn-main" onclick="saveSettings()">Sync System</button>
+        </div>
+    </div>
+
+    <div id="projection-overlay" class="overlay">
+        <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('projection-overlay')">✕</span><h2 style="margin-bottom: 20px;">Liquidity Forecast</h2><div class="proj-table-header"><span>Date</span><span>Projected Limit</span></div><div id="projection-list"></div></div>
+    </div>
+
+    <div id="adhoc-overlay" class="overlay">
+        <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('adhoc-overlay')">✕</span><h2 style="margin-bottom: 25px;">Top-up Funds</h2><div class="form-group"><label>Amount to Add</label><input type="number" id="input-adhoc" placeholder="0.00" inputmode="decimal"></div><button class="btn-main" onclick="handleAdHoc()">Top Up Global Pool</button></div>
+    </div>
+
+    <div id="sync-confirm-overlay" class="overlay">
+        <div class="overlay-content" style="max-width: 400px; padding: 50px 30px;"><div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div><h2 style="margin-bottom: 15px; font-weight: 800;">Are you sure you want to start a new month?</h2><p style="color: var(--text-dim); font-size: 0.85rem; line-height: 1.6; margin-bottom: 35px;">Starting a new month will remove the old limits and tracking data. This action cannot be undone.</p><button class="btn-main" onclick="confirmResetAndOpenInit()">Yes, Proceed</button><button class="btn-secondary" onclick="closeOverlay('sync-confirm-overlay')">Cancel</button></div>
+    </div>
+
+    <div id="init-overlay" class="overlay">
+        <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('init-overlay')">✕</span><h2 style="margin-bottom: 25px;">Initialize Cycle</h2><div class="form-group"><label>Starting Monthly Pool</label><input type="number" id="input-init-pool" placeholder="0.00" inputmode="decimal"></div><button class="btn-main" onclick="initializeMonth()">Set Nero Sync</button></div>
+    </div>
+
+    <script>
+        // --- DATA PERSISTENCE ---
+        let state = JSON.parse(localStorage.getItem('nero_spend_foe_v7')) || {
+            name: "", currency: "₹", policy: "indian", pool: 0, threshold: 0,
+            ratios: [1, 1, 1, 1, 1, 2, 2], templates: [], lockedAllowance: 0,
+            dailyBaselinePool: 0, spentToday: 0, lastResetDate: null,
+            fundHistory: [], spendHistory: [], dailyStats: []
+        };
+
+        const save = () => { localStorage.setItem('nero_spend_foe_v7', JSON.stringify(state)); refreshUI(); };
+        const getEffectiveDate = () => { let now = new Date(); if (state.policy === 'indian') now.setHours(now.getHours() - 6); return now; };
+        const validateNumeric = (val, field) => { if (val === "" || isNaN(parseFloat(val))) { notify(`Entry Error: ${field} requires numbers`, "danger"); return false; } return true; };
+
+        const getRemainingUnits = (includeToday) => {
+            const now = getEffectiveDate();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const last = new Date(year, month + 1, 0).getDate();
+            let units = 0;
+            const start = includeToday ? now.getDate() : now.getDate() + 1;
+            for (let d = start; d <= last; d++) {
+                units += state.ratios[(new Date(year, month, d).getDay() + 6) % 7] || 1;
+            }
+            return units;
+        };
+
+        const resetDaily = () => {
+            const now = getEffectiveDate();
+            const dateStr = now.toDateString();
+            if (state.lastResetDate && state.lastResetDate !== dateStr) {
+                state.dailyStats.push({ date: state.lastResetDate, limit: state.lockedAllowance, spent: state.spentToday });
+                recalculateAllowance();
+                state.spentToday = 0;
+                state.dailyBaselinePool = state.pool;
+                state.lastResetDate = dateStr;
+                save();
+            } else if (!state.lastResetDate) {
+                state.lastResetDate = dateStr;
+                save();
+            }
+        };
+
+        const recalculateAllowance = () => {
+            const total = getRemainingUnits(true);
+            const ratio = state.ratios[(getEffectiveDate().getDay() + 6) % 7];
+            if (total > 0) state.lockedAllowance = (state.pool / total) * ratio;
+        };
+
+        const handleSpending = () => {
+            const raw = document.getElementById('input-spend').value;
+            if (!validateNumeric(raw, "Amount")) return;
+            const val = parseFloat(raw);
+            if (val <= 0) return;
+            const remUnits = getRemainingUnits(true);
+            const safety = state.threshold * remUnits;
+            if ((state.pool - val) < (safety - 0.01)) { notify(`Safety Halt: Max spendable is ${state.currency}${(state.pool - safety).toFixed(2)}`, "danger"); return; }
+            state.spentToday += val;
+            state.pool -= val;
+            state.spendHistory.push({ amount: val, date: new Date().toISOString() });
+            if (document.getElementById('check-save-template').checked) {
+                const n = document.getElementById('input-template-name').value.trim() || val.toString();
+                state.templates.push({ name: n, val: val });
+            }
+            document.getElementById('input-spend').value = '';
+            document.getElementById('check-save-template').checked = false;
+            document.getElementById('input-template-name').classList.add('hidden');
+            save();
+            notify("Transaction Saved", "primary");
+        };
+
+        const handleAdHoc = () => {
+            const raw = document.getElementById('input-adhoc').value;
+            if (!validateNumeric(raw, "Top-up")) return;
+            const val = parseFloat(raw);
+            state.pool += val;
+            state.dailyBaselinePool += val;
+            state.fundHistory.push({ type: 'Top-up', amount: val, date: new Date().toISOString() });
+            recalculateAllowance();
+            closeOverlay('adhoc-overlay');
+            save();
+            notify("Top-up Recorded", "primary");
+        };
+
+        const confirmResetAndOpenInit = () => { closeOverlay('sync-confirm-overlay'); openOverlay('init-overlay'); };
+
+        const initializeMonth = () => {
+            const raw = document.getElementById('input-init-pool').value;
+            if (!validateNumeric(raw, "Starting Monthly Pool")) return;
+            const val = parseFloat(raw);
+            state.pool = val;
+            state.dailyBaselinePool = val;
+            state.spentToday = 0;
+            state.fundHistory = [{ type: 'Initial Pool', amount: val, date: new Date().toISOString() }];
+            state.spendHistory = [];
+            state.dailyStats = [];
+            state.lastResetDate = getEffectiveDate().toDateString();
+            recalculateAllowance();
+            closeOverlay('init-overlay');
+            save();
+            notify("Cycle Synchronized", "primary");
+        };
+
+        const notify = (msg, type) => {
+            const n = document.getElementById('notification');
+            if(!n) return;
+            n.innerText = msg;
+            n.style.background = type === "primary" ? "var(--primary)" : "var(--danger)";
+            n.style.color = type === "primary" ? "#000" : "#FFF";
+            n.style.display = 'block';
+            setTimeout(() => n.style.display = 'none', 3000);
+        };
+
+        const openOverlay = (id) => {
+            document.getElementById(id).style.display = 'block';
+            if (id === 'settings-overlay') {
+                document.getElementById('set-name').value = state.name;
+                document.getElementById('set-currency').value = state.currency;
+                document.getElementById('set-policy').value = state.policy;
+                document.getElementById('set-threshold').value = state.threshold;
+                state.ratios.forEach((r, i) => document.getElementById(`r${i}`).value = r);
+            } else if (id === 'projection-overlay') renderProjection();
+            else if (id === 'fund-history-overlay') renderFundHistory();
+            else if (id === 'spend-history-overlay') renderSpendHistory();
+        };
+
+        const closeOverlay = (id) => document.getElementById(id).style.display = 'none';
+
+        const saveSettings = () => {
+            if (!validateNumeric(document.getElementById('set-threshold').value, "Floor")) return;
+            for (let i=0; i<7; i++) if (!validateNumeric(document.getElementById(`r${i}`).value, `Day ${i}`)) return;
+            state.name = document.getElementById('set-name').value.trim();
+            state.currency = document.getElementById('set-currency').value;
+            state.policy = document.getElementById('set-policy').value;
+            state.threshold = parseFloat(document.getElementById('set-threshold').value);
+            state.ratios = state.ratios.map((_, i) => parseFloat(document.getElementById(`r${i}`).value));
+            recalculateAllowance();
+            save();
+            closeOverlay('settings-overlay');
+            notify("Settings Saved", "primary");
+        };
+
+        const renderFundHistory = () => {
+            const list = document.getElementById('fund-history-list');
+            list.innerHTML = state.fundHistory.length ? '' : '<p style="color:var(--text-dim)">No records found.</p>';
+            state.fundHistory.slice().reverse().forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `<div><span class="h-label">${item.type}</span><span class="h-meta">${new Date(item.date).toLocaleString()}</span></div><span class="h-val">${state.currency}${item.amount.toFixed(2)}</span>`;
+                list.appendChild(div);
+            });
+        };
+
+        const renderSpendHistory = () => {
+            const list = document.getElementById('spend-history-list');
+            const totalVal = state.spendHistory.reduce((acc, curr) => acc + curr.amount, 0);
+            document.getElementById('total-spend-val').innerText = `${state.currency}${totalVal.toFixed(2)}`;
+            list.innerHTML = '';
+            const grouped = {};
+            state.spendHistory.forEach(s => { const d = new Date(s.date).toDateString(); if (!grouped[d]) grouped[d] = { txns: [], stats: null }; grouped[d].txns.push(s); });
+            state.dailyStats.forEach(stat => { if (!grouped[stat.date]) grouped[stat.date] = { txns: [], stats: stat }; else grouped[stat.date].stats = stat; });
+            const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
+            if (!sortedDates.length) { list.innerHTML = '<p style="color:var(--text-dim)">No records found.</p>'; return; }
+            sortedDates.forEach(date => {
+                const group = grouped[date];
+                const section = document.createElement('div');
+                section.className = 'day-group';
+                section.innerHTML = `<div class="day-header"><span class="d-title">${date}</span><span class="d-stats">${group.stats ? `Limit: ${state.currency}${group.stats.limit.toFixed(2)} | Spent: ${state.currency}${group.stats.spent.toFixed(2)}` : 'Active Day'}</span></div>`;
+                group.txns.slice().reverse().forEach(t => {
+                    const txn = document.createElement('div');
+                    txn.className = 'history-item'; txn.style.border = 'none'; txn.style.padding = '8px 0';
+                    txn.innerHTML = `<span class="h-meta">${new Date(t.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span><span class="h-val" style="font-size:0.9rem">${state.currency}${t.amount.toFixed(2)}</span>`;
+                    section.appendChild(txn);
+                });
+                list.appendChild(section);
+            });
+        };
+
+        const refreshUI = () => {
+            resetDaily(); 
+            const now = getEffectiveDate();
+            const displayName = state.name || "User";
+            document.getElementById('greeting-line1').innerText = `Hi ${displayName},`;
+            document.getElementById('display-date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+            
+            const target = new Date(now);
+            const policyOffset = state.policy === 'indian' ? 6 : 0;
+            target.setHours(24 + policyOffset, 0, 0, 0);
+            
+            const realNow = new Date();
+            const diff = target - realNow;
+            const h = Math.max(0, Math.floor(diff / 3600000));
+            const m = Math.max(0, Math.floor((diff % 3600000) / 60000));
+            const s = Math.max(0, Math.floor((diff % 60000) / 1000));
+            document.getElementById('display-timer').innerText = `${h}h ${m}m ${s}s`;
+
+            const leftover = state.lockedAllowance - state.spentToday;
+            document.getElementById('val-available').innerText = `${state.currency}${leftover.toFixed(2)}`;
+            document.getElementById('val-spent').innerText = `${state.currency}${state.spentToday.toFixed(2)}`;
+            document.getElementById('val-original-daily').innerText = `${state.currency}${state.lockedAllowance.toFixed(2)}`;
+            document.getElementById('val-total-pool').innerText = `${state.currency}${state.pool.toFixed(2)}`;
+            document.getElementById('val-available').style.color = leftover < -0.01 ? 'var(--danger)' : 'var(--primary)';
+            document.getElementById('overspend-status-text').style.display = leftover < -0.01 ? 'block' : 'none';
+            
+            const ql = document.getElementById('quick-logs');
+            ql.innerHTML = '';
+            state.templates.slice(-4).forEach(t => {
+                const b = document.createElement('button');
+                b.className = 'quick-btn';
+                b.innerText = `${t.name} (${t.val})`;
+                b.onclick = () => document.getElementById('input-spend').value = t.val;
+                ql.appendChild(b);
+            });
+        };
+
+        const renderProjection = () => {
+            const container = document.getElementById('projection-list');
+            container.innerHTML = '';
+            const now = getEffectiveDate();
+            const remToday = getRemainingUnits(true);
+            const futUnits = getRemainingUnits(false);
+            const baselineRate = remToday > 0 ? (state.dailyBaselinePool / remToday) : 0;
+            const perfToday = (baselineRate * (state.ratios[(now.getDay() + 6) % 7] || 1)) - state.spentToday;
+            let curRate = perfToday < -0.01 ? (futUnits > 0 ? (state.pool / futUnits) : 0) : (remToday > 0 ? (state.pool / remToday) : baselineRate);
+            for (let d = now.getDate() + 1; d <= new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); d++) {
+                let dObj = new Date(now.getFullYear(), now.getMonth(), d);
+                let r = state.ratios[(dObj.getDay() + 6) % 7] || 1;
+                const row = document.createElement('div');
+                row.className = 'proj-row';
+                row.innerHTML = `<span class="day-name">${dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span><div class="vals"><span class="cur-val">${state.currency}${(curRate * r).toFixed(2)}</span><span class="orig-val">Original: ${state.currency}${(baselineRate * r).toFixed(2)}</span></div>`;
+                container.appendChild(row);
+            }
+        };
+
+        document.getElementById('check-save-template').onchange = (e) => {
+            const box = document.getElementById('input-template-name');
+            if (e.target.checked) { box.classList.remove('hidden'); box.focus(); } else box.classList.add('hidden');
+        };
+
+        window.onload = () => { refreshUI(); setInterval(refreshUI, 1000); };
+    </script>
+</body>
+</html>

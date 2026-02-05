@@ -1,0 +1,30 @@
+{
+  "name": "Nero Spend Foe",
+  "short_name": "Nero",
+  "description": "Elite Liquidity Manager by Saptarshi Kundu",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "icons": [
+    {
+      "src": "Gemini_Generated_Image_jy5o2ejy5o2ejy5o.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "Gemini_Generated_Image_jy5o2ejy5o2ejy5o.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Transaction",
+      "url": "/#new",
+      "description": "Log a new expenditure instantly"
+    }
+  ]
+}
