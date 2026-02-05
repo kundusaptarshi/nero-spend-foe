@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nero-sync-v1.0.1';
+const CACHE_NAME = 'nero-sync-v1.0.2';
 const ASSETS = [
   './',
   './index.html',
@@ -14,7 +14,6 @@ self.addEventListener('install', (event) => {
       return cache.addAll(ASSETS);
     })
   );
-  // Force the waiting service worker to become the active service worker
   self.skipWaiting();
 });
 
@@ -33,7 +32,6 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetching: Serving from cache or network
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
