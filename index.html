@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>NeroSpendFoe | Elite Liquidity Manager</title>
+    <title>NeroSpendFoe | Daily Limit Manager</title>
     
     <!-- Cloudflare Web Analytics -->
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "55ba6cda1c7a4350b48ad3809c44b281"}'></script>
-    <!-- End Cloudflare Web Analytics -->
     
     <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,53 +14,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
-        // Service Worker Registration for PWA
-        if ('serviceWorker' in navigator) {
+        if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('Nero Sync active.');
-                }).catch(err => {
-                    console.log('Sync failed: ', err);
+                navigator.serviceWorker.register('sw.js').then(() => {
+                    console.log('Nero Sync v1.6.3 active.');
                 });
             });
         }
 
         function handleLogoError(img) {
             img.style.display = 'none';
-            var fallback = document.getElementById('logo-icon-fallback');
+            const fallback = document.getElementById('logo-icon-fallback');
             if (fallback) fallback.style.display = 'block';
         }
-
-        window.addEventListener('load', () => {
-            // TRACKING LOGIC: Log Session Type to Console for debugging
-            const sessionType = window.matchMedia('(display-mode: standalone)').matches ? 'Installed App' : 'Browser';
-            console.log(`NeroSpendFoe Session Started: ${sessionType}`);
-        });
     </script>
 
     <style>
         :root {
-            /* Matte Onyx Palette */
             --bg: #121212;
             --surface: #121212;
             --light-shadow: #1D1D1D;
             --dark-shadow: #000000;
-            
             --primary: #FF8243; 
             --primary-dark: #D15B22;
             --accent: #E0E0E0;  
             --danger: #E8083E; 
             --text: #FFFFFF;
             --text-dim: #707070; 
-            
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
-            
-            /* Shadows */
             --out-shadow: -5px -5px 12px var(--light-shadow), 5px 5px 12px var(--dark-shadow);
             --in-shadow: inset -3px -3px 8px var(--light-shadow), inset 3px 3px 8px var(--dark-shadow);
-            --btn-active: inset -2px -2px 5px var(--light-shadow), inset 2px 2px 5px var(--dark-shadow);
-            
             --out-shadow-matte: -4px -4px 10px rgba(255, 255, 255, 0.03), 5px 5px 12px var(--dark-shadow);
             --btn-active-matte: inset 3px 3px 10px rgba(0, 0, 0, 0.5), inset -2px -2px 5px rgba(255, 255, 255, 0.05);
         }
@@ -72,16 +55,15 @@
         input[type=number] { -moz-appearance: textfield; }
 
         .container { max-width: 900px; margin: 0 auto; padding: calc(20px + var(--safe-top)) 24px calc(25px + var(--safe-bottom)) 24px; }
-
+        
         .top-meta { margin-bottom: 25px; }
-        .meta-line-1 { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 15px; font-weight: 500; }
-        .meta-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-        #display-timer-label { font-size: 0.65rem; }
+        .meta-line-1 { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 15px; font-weight: 500; }
+        .meta-right { display: flex; align-items: center; gap: 10px; text-align: right; }
         #display-timer { font-size: 0.7rem; color: var(--text-dim); letter-spacing: 1px; font-weight: 600; white-space: nowrap; }
 
-        .brand-greeting-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 30px; }
+        .brand-greeting-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 30px; }
         .greeting-stack { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-        .user-greeting-line1 { font-size: 0.85rem; font-weight: 500; color: var(--text); letter-spacing: 0.2px; overflow: hidden; text-overflow: ellipsis; }
+        .user-greeting-line1 { font-size: 0.85rem; font-weight: 500; color: var(--text); letter-spacing: 0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .user-greeting-line2 { font-size: 0.85rem; font-weight: 500; color: var(--text-dim); letter-spacing: 0.2px; }
         
         .logo-container { width: 48px; height: 48px; border-radius: 12px; background: transparent; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; padding: 4px; flex-shrink: 0; }
@@ -90,19 +72,22 @@
 
         .dashboard-main { display: grid; grid-template-columns: 1.6fr 1fr; gap: 25px; margin-bottom: 30px; }
 
-        .log-section { background: var(--surface); padding: 35px 30px; border-radius: 40px; box-shadow: var(--out-shadow); text-align: left; display: flex; flex-direction: column; justify-content: space-between; }
+        .log-section { background: var(--surface); padding: 35px 30px; border-radius: 40px; box-shadow: var(--out-shadow); display: flex; flex-direction: column; justify-content: space-between; }
         .log-section h2 { font-size: 0.8rem; color: var(--text); text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2.5px; font-weight: 800; }
-        .input-recess { background: var(--surface); border-radius: 20px; box-shadow: var(--in-shadow); padding: 15px 25px; margin-bottom: 25px; }
-        #input-spend { background: transparent; border: none; color: var(--primary); font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 800; width: 100%; text-align: left; outline: none; }
+        
+        .input-recess { background: var(--surface); border-radius: 20px; box-shadow: var(--in-shadow); padding: 15px 25px; margin-bottom: 25px; display: flex; align-items: center; }
+        .input-recess input { background: transparent; border: none; color: var(--primary); font-size: 2rem; font-weight: 800; width: 100%; text-align: left; outline: none; }
+        #input-spend { font-size: clamp(2.2rem, 8vw, 4rem) !important; }
 
         .template-save { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; font-size: 0.8rem; color: var(--text-dim); }
-        #input-template-name { width: 120px; box-shadow: var(--in-shadow); border: none; background: var(--surface); border-radius: 8px; padding: 6px 12px; color: #FFFFFF; font-family: 'Inter', sans-serif; font-size: 0.8rem; outline: none; }
+        #input-template-name { width: 120px; box-shadow: var(--in-shadow); border: none; background: var(--surface); border-radius: 8px; padding: 6px 12px; color: #FFFFFF; font-size: 0.8rem; outline: none; }
         .template-save input[type="checkbox"] { width: 18px; height: 18px; border-radius: 6px; background: var(--surface); box-shadow: var(--in-shadow); appearance: none; cursor: pointer; position: relative; }
         .template-save input[type="checkbox"]:checked::after { content: "✓"; position: absolute; left: 3px; top: -1px; color: var(--primary); font-weight: 900; font-size: 14px; }
 
         .quick-logs { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 25px; }
         .quick-btn { background: var(--surface); border: none; color: var(--text-dim); padding: 12px 20px; border-radius: 16px; font-size: 0.75rem; font-weight: 600; cursor: pointer; box-shadow: var(--out-shadow); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .quick-btn:active { box-shadow: inset -3px -3px 8px var(--light-shadow), inset 3px 3px 8px var(--dark-shadow); transform: scale(0.98); color: var(--primary); }
+        .quick-btn:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
 
         .stats-sidebar { display: flex; flex-direction: column; gap: 20px; }
         .stat-card { background: var(--surface); padding: 28px; border-radius: 35px; box-shadow: var(--out-shadow); display: flex; flex-direction: column; justify-content: center; flex: 1; }
@@ -111,45 +96,102 @@
         .stat-card .sub-val { font-size: 0.7rem; color: var(--text-dim); font-weight: 600; }
         .card-warning-text { color: var(--danger); font-size: 0.65rem; font-weight: 700; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: none; line-height: 1.3; }
 
-        .home-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .action-btn { background: var(--surface); box-shadow: var(--out-shadow); color: var(--text); padding: 22px; border-radius: 25px; cursor: pointer; border: none; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 0.9rem; transition: all 0.2s ease; }
+        .home-actions { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; 
+            grid-template-rows: auto auto; 
+            gap: 12px; 
+            margin-bottom: 40px; 
+        }
+
+        .action-btn { 
+            background: var(--surface); 
+            box-shadow: var(--out-shadow); 
+            color: var(--text); 
+            padding: 15px 5px; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            border: none; 
+            font-weight: 700; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            font-size: 0.7rem; 
+            transition: all 0.2s ease; 
+            text-align: center;
+            line-height: 1.3;
+            min-height: 80px;
+        }
+        
+        .action-btn:nth-child(1) {
+            grid-row: 1 / 3;
+            grid-column: 1 / 2;
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
         .action-btn:active { box-shadow: inset -3px -3px 8px var(--light-shadow), inset 3px 3px 8px var(--dark-shadow); transform: scale(0.97); }
+        .action-btn.disabled-look { opacity: 0.35; filter: grayscale(1); cursor: not-allowed; }
 
         .header-icon { width: 38px; height: 38px; background: var(--surface); box-shadow: var(--out-shadow); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; transition: all 0.2s ease; color: var(--text-dim); }
         .header-icon:active { box-shadow: inset -3px -3px 8px var(--light-shadow), inset 3px 3px 8px var(--dark-shadow); color: var(--primary); }
 
         .btn-main { background: var(--primary); color: #000000; font-weight: 800; border: none; width: 100%; padding: 22px; border-radius: 24px; cursor: pointer; font-size: 0.9rem; box-shadow: var(--out-shadow-matte); text-transform: uppercase; letter-spacing: 2px; transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
-        .btn-main::after { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.08); pointer-events: none; }
         .btn-main:active { box-shadow: var(--btn-active-matte); transform: scale(0.985); background: var(--primary-dark); }
         .btn-secondary { background: transparent; color: var(--text-dim); border: none; padding: 15px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; margin-top: 10px; }
 
         .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 2000; display: none; padding: 25px; overflow-y: auto; }
         .overlay-content { max-width: 550px; margin: 30px auto; background: var(--surface); border-radius: 45px; padding: 40px; box-shadow: var(--out-shadow); text-align: center; }
 
-        .history-list { text-align: left; margin-top: 20px; }
-        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #1a1a1a; }
-        .history-item .h-label { font-weight: 600; font-size: 0.9rem; color: var(--text); }
-        .history-item .h-meta { font-size: 0.7rem; color: var(--text-dim); display: block; margin-top: 4px; }
-        .history-item .h-val { font-weight: 800; font-size: 1rem; color: var(--primary); }
+        .data-table-container { width: 100%; margin-top: 15px; text-align: left; }
+        .data-table-header { display: grid; padding-bottom: 12px; border-bottom: 2px solid var(--light-shadow); margin-bottom: 8px; font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; font-weight: 900; letter-spacing: 1.2px; }
+        .data-table-header span:not(:first-child) { text-align: right; }
+        
+        .data-table-row { display: grid; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center; }
+        .data-table-row:last-child { border-bottom: none; }
+        .data-table-label { font-size: 0.85rem; color: var(--text); font-weight: 600; }
+        .data-table-val { font-size: 0.95rem; font-weight: 800; color: var(--primary); text-align: right; }
 
-        .guide-section { text-align: left; margin-bottom: 35px; }
-        .guide-section h3 { font-size: 0.9rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-left: 3px solid var(--primary); padding-left: 10px; }
-        .guide-step { margin-bottom: 18px; padding-left: 10px; border-left: 1px solid var(--light-shadow); position: relative; }
-        .guide-step .step-title { color: var(--text); font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 3px; }
-        .guide-step p { font-size: 0.75rem; color: var(--text-dim); line-height: 1.5; margin: 0; }
+        .table-edit-input { background: var(--surface); box-shadow: var(--in-shadow); border: none; color: var(--primary); font-weight: 800; font-family: 'Inter', sans-serif; text-align: right; width: 100%; padding: 8px 10px; border-radius: 10px; font-size: 0.9rem; outline: none; transition: opacity 0.3s; }
+        .table-edit-input:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; color: var(--text-dim); }
 
         .footer { margin-top: 80px; text-align: center; padding: 40px 0 20px 0; border-top: 1px solid rgba(255,255,255,0.05); }
         .footer-text { font-size: 0.55rem; color: var(--text-dim); font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; opacity: 0.5; }
 
         .form-group { margin-bottom: 25px; text-align: left; }
         .form-group label { display: block; font-size: 0.65rem; color: var(--text-dim); margin-bottom: 12px; text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; }
-        input[type="text"], input[type="number"], select { width: 100%; background: var(--surface); border: none; box-shadow: var(--in-shadow); color: white; padding: 18px 22px; border-radius: 18px; font-size: 1rem; outline: none; }
-        
+        input[type="text"], select { width: 100%; background: var(--surface); border: none; box-shadow: var(--in-shadow); color: white; padding: 18px 22px; border-radius: 18px; font-size: 1rem; outline: none; }
         .compact-input { padding: 12px 2px !important; text-align: center; font-size: 0.8rem !important; border-radius: 12px !important; }
+        
+        .custom-checkbox { width: 22px; height: 22px; border-radius: 6px; background: var(--surface); box-shadow: var(--in-shadow); appearance: none; cursor: pointer; position: relative; border: none; outline: none; flex-shrink: 0; }
+        .custom-checkbox:checked::after { content: "✓"; position: absolute; left: 5px; top: 0px; color: var(--primary); font-weight: 900; font-size: 14px; }
+
+        /* Manual Pagination Styles */
+        .manual-container { position: relative; overflow: hidden; min-height: 400px; display: flex; flex-direction: column; }
+        .manual-page { display: none; flex: 1; animation: fadeIn 0.3s ease; }
+        .manual-page.active { display: block; }
+        .manual-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .nav-arrow { font-size: 1.5rem; color: var(--primary); cursor: pointer; padding: 10px; user-select: none; }
+        .nav-dots { display: flex; gap: 6px; }
+        .nav-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); opacity: 0.3; transition: all 0.2s; }
+        .nav-dot.active { background: var(--primary); opacity: 1; transform: scale(1.2); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+
+        .guide-section { text-align: left; margin-bottom: 20px; }
+        .guide-section h3, .manual-page h2 { font-size: 1rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid rgba(255,130,67,0.1); }
+        .guide-step { margin-bottom: 18px; padding-left: 10px; border-left: 1px solid var(--light-shadow); position: relative; }
+        .guide-step .step-title { color: var(--text); font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 3px; }
+        .guide-step p { font-size: 0.75rem; color: var(--text-dim); line-height: 1.5; margin: 0; }
+
+        .day-group { margin-bottom: 30px; text-align: left; }
+        .day-header { padding: 12px 18px; background: var(--light-shadow); border-radius: 12px; margin-bottom: 10px; }
+        .day-header .d-title { font-size: 0.75rem; color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .day-header .d-stats { font-size: 0.6rem; color: var(--text-dim); margin-top: 4px; display: block; }
 
         #notification { position: fixed; top: 50px; left: 30px; right: 30px; max-width: 400px; margin: 0 auto; padding: 20px 30px; border-radius: 25px; background: var(--danger); color: #FFF; font-weight: 800; display: none; z-index: 3000; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.8); animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes slideIn { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
         .hidden { display: none; }
         @media (max-width: 768px) { .dashboard-main { grid-template-columns: 1fr; } .stats-sidebar { flex-direction: row; } }
     </style>
@@ -164,9 +206,9 @@
             <div class="meta-line-1">
                 <div id="display-date">...</div>
                 <div class="meta-right">
-                    <div id="display-timer-label">Next-Day Reset In:</div>
-                    <div id="display-timer">...</div>
-                    <div class="header-icon" onclick="openOverlay('howto-overlay')" style="font-size: 0.8rem; font-weight: 900;">?</div>
+                    <span id="display-timer-label">Next-Day Reset In:</span>
+                    <span id="display-timer">...</span>
+                    <div class="header-icon" onclick="openManual()" style="font-size: 0.8rem; font-weight: 900;">?</div>
                     <div class="header-icon" onclick="openOverlay('settings-overlay')">⚙️</div>
                 </div>
             </div>
@@ -177,8 +219,7 @@
                     <div class="user-greeting-line2">Welcome to NeroSpendFoe.</div>
                 </div>
                 <div class="logo-container">
-                    <img id="app-logo" src="Gemini_Generated_Image_kggd5tkggd5tkggd.png" 
-                         alt="Logo" class="app-logo-small" onerror="handleLogoError(this)">
+                    <img id="app-logo" src="Gemini_Generated_Image_kggd5tkggd5tkggd.png" alt="Logo" class="app-logo-small" onerror="handleLogoError(this)">
                     <span id="logo-icon-fallback" class="logo-fallback">NSF</span>
                 </div>
             </div>
@@ -191,7 +232,7 @@
                     <input type="number" id="input-spend" placeholder="0.00" step="0.01" inputmode="decimal">
                 </div>
                 <div class="template-save">
-                    <input type="checkbox" id="check-save-template">
+                    <input type="checkbox" id="check-save-template" class="custom-checkbox">
                     <label for="check-save-template">Save Shortcut</label>
                     <input type="text" id="input-template-name" placeholder="Name" class="hidden">
                 </div>
@@ -200,225 +241,335 @@
             </div>
 
             <div class="stats-sidebar">
-                <div class="stat-card" id="card-available">
+                <div class="stat-card">
                     <div class="label">Limit Today</div>
                     <div class="val" id="val-available">0.00</div>
-                    <div class="sub-val">Original Budget: <span id="val-original-daily">0.00</span></div>
+                    <div class="sub-val">Original Limit: <span id="val-original-daily">0.00</span></div>
                 </div>
-                <div class="stat-card" id="card-spent">
+                <div class="stat-card">
                     <div class="label">Spent Today</div>
                     <div class="val" id="val-spent">0.00</div>
-                    <div class="sub-val">Total Pool Remaining: <span id="val-total-pool">0.00</span></div>
-                    <div id="overspend-status-text" class="card-warning-text">Budget exceeded. Liquidity Forecast adjusted.</div>
+                    <div class="sub-val">Monthly Limit Remaining: <span id="val-total-pool">0.00</span></div>
+                    <div id="overspend-status-text" class="card-warning-text">Budget exceeded. Limit adjusted.</div>
                 </div>
             </div>
         </div>
 
         <div class="home-actions">
-            <div class="action-btn" onclick="openOverlay('adhoc-overlay')">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-                Add Funds
+            <!-- 1: Start New Month (Spans 2 rows) -->
+            <div class="action-btn" onclick="openOverlay('sync-confirm-overlay')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM3 10h18"/></svg>
+                Start New Month
             </div>
-            <div class="action-btn" onclick="openOverlay('projection-overlay')">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 3v18h18M7 16l4-4 4 4 6-6"/></svg>
-                Liquidity Forecast
-            </div>
-            <div class="action-btn" onclick="openOverlay('fund-history-overlay')">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h7M16 19h6M19 16l3 3-3 3M13 10H7M10 14H7"/></svg>
-                Fund History
-            </div>
+            
+            <!-- 2: Spend History (Row 1 Col 2) -->
             <div class="action-btn" onclick="openOverlay('spend-history-overlay')">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 Spend History
             </div>
-            <div class="action-btn" onclick="openOverlay('sync-confirm-overlay')">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM3 10h18"/></svg>
-                New Month
+            
+            <!-- 3: Monthly Limit Forecast (Row 1 Col 3) -->
+            <div class="action-btn" id="btn-forecast-main-act" onclick="handleForecastWrapper()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 16l4-4 4 4 6-6"/></svg>
+                Monthly Limit Forecast
+            </div>
+            
+            <!-- 4: Top-Up Monthly Limit (Row 2 Col 2) -->
+            <div class="action-btn" id="btn-topup-main-act" onclick="handleAdHocWrapper()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                Top-Up Monthly Limit
+            </div>
+            
+            <!-- 5: Fund History (Row 2 Col 3) -->
+            <div class="action-btn" id="btn-fund-history-act" onclick="handleFundHistoryWrapper()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h7M16 19h6M19 16l3 3-3 3M13 10H7M10 14H7"/></svg>
+                Fund History
             </div>
         </div>
 
         <footer class="footer">
-            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.1.2</div>
+            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.6.3</div>
         </footer>
     </div>
 
-    <!-- MANUAL -->
+    <!-- MANUAL WITH PAGINATION -->
     <div id="howto-overlay" class="overlay">
-        <div class="overlay-content">
-            <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('howto-overlay')">✕</span>
-            <h2 style="margin-bottom: 30px; font-weight: 800; color: var(--primary-dark);">Manual</h2>
+        <div class="overlay-content" style="padding: 30px 25px;">
+            <div class="manual-container" id="manual-container">
+                <!-- Page 1: Intro -->
+                <div class="manual-page active">
+                    <h2>Introduction</h2>
+                    <p style="color: var(--text-dim); line-height: 1.6; margin-bottom: 20px;">Welcome to <b>NeroSpendFoe</b>. Unlike static budget apps, Nero is <b>dynamic</b>. Every transaction instantly updates your forecast and daily limits for the rest of the month, ensuring you never run out of funds.</p>
+                    <div class="guide-section">
+                        <h3>Why Nero?</h3>
+                        <div class="guide-step"><span class="step-title">Automatic Calibration</span><p>Spend heavy today? Nero lowers future limits automatically. Save today? Your future limits go up.</p></div>
+                        <div class="guide-step"><span class="step-title">100% Safe & Private</span><p>No banking details required. No login. No server tracking. Your data is yours alone.</p></div>
+                    </div>
+                    <div class="guide-section">
+                        <h3>PWA Architecture</h3>
+                        <div class="guide-step"><span class="step-title">Offline First</span><p>Works without internet.</p></div>
+                        <div class="guide-step"><span class="step-title">Zero Install</span><p>No app store downloads needed.</p></div>
+                    </div>
+                </div>
+
+                <!-- Page 2: Installation -->
+                <div class="manual-page">
+                    <h2>Setup & Install</h2>
+                    <div class="guide-section">
+                        <h3>Installation Guide</h3>
+                        <div class="guide-step"><span class="step-title">Android (Chrome)</span><p>Tap the menu (⋮) and select "Install app" or "Add to Home screen".</p></div>
+                        <div class="guide-step"><span class="step-title">iOS (Safari)</span><p>Tap the "Share" icon (bottom center) and select "Add to Home Screen".</p></div>
+                    </div>
+                    <div class="guide-section">
+                        <h3>Quick Start</h3>
+                        <div class="guide-step"><span class="step-title">1. Initialize</span><p>Tap 'Start New Month' to set your total budget.</p></div>
+                        <div class="guide-step"><span class="step-title">2. Configure</span><p>Set Currency & Name in Settings.</p></div>
+                        <div class="guide-step"><span class="step-title">3. Track</span><p>Log expenses daily. The system auto-adjusts limits.</p></div>
+                    </div>
+                </div>
+
+                <!-- Page 3: Core Operations -->
+                <div class="manual-page">
+                    <h2>Core Operations</h2>
+                    <div class="guide-section">
+                        <h3>Transaction Entry</h3>
+                        <div class="guide-step"><span class="step-title">Logging</span><p>Enter amount and Confirm. This deducts from your Limit Today.</p></div>
+                        <div class="guide-step"><span class="step-title">Shortcuts</span><p>Check 'Save Shortcut' to create quick buttons for frequent expenses.</p></div>
+                    </div>
+                    <div class="guide-section">
+                        <h3>Dashboard Analytics</h3>
+                        <div class="guide-step"><span class="step-title">Limit Today</span><p>Your live spendable balance. Changes dynamically based on spending.</p></div>
+                        <div class="guide-step"><span class="step-title">Original Limit</span><p>Your planned baseline for the day.</p></div>
+                        <div class="guide-step"><span class="step-title">Monthly Limit Remaining</span><p>Total funds left. Hitting zero blocks spending.</p></div>
+                    </div>
+                </div>
+
+                <!-- Page 4: Advanced Controls -->
+                <div class="manual-page">
+                    <h2>Advanced Controls</h2>
+                    <div class="guide-section">
+                        <div class="guide-step"><span class="step-title">Monthly Limit Forecast</span><p>View future limits. Edit the <b>Original Plan</b> (Orange) column to adjust specific days; the system redistributes the difference across the rest of the month.</p></div>
+                        <div class="guide-step"><span class="step-title">Top-Up Monthly Limit</span><p>Inject unexpected income into your pool. Only available when a month is active.</p></div>
+                        <div class="guide-step"><span class="step-title">Start New Month</span><p>Resets data for a new cycle. Offers to carry forward remaining funds if available.</p></div>
+                        <div class="guide-step"><span class="step-title">History Logs</span><p>Track your income sources (Fund History) and daily expenditure logs (Spend History).</p></div>
+                    </div>
+                </div>
+
+                <!-- Page 5: Configuration Master -->
+                <div class="manual-page">
+                    <h2>Configuration</h2>
+                    <div class="guide-section">
+                        <h3>Settings</h3>
+                        <div class="guide-step"><span class="step-title">Display Name</span><p>Personalize your greeting.</p></div>
+                        <div class="guide-step"><span class="step-title">Currency</span><p>Set your preferred currency symbol.</p></div>
+                        <div class="guide-step"><span class="step-title">Next-Day Reset Policy</span><p>Choose when your 'day' rolls over (Indian 6AM or Global Midnight).</p></div>
+                        <div class="guide-step"><span class="step-title">Minimum Daily Limit</span><p>A hard reserve to ensure you never run completely dry.</p></div>
+                        <div class="guide-step"><span class="step-title">Limit Distribution Ratio</span><p>Weight specific days (like weekends) to allocate more funds automatically.</p></div>
+                    </div>
+                </div>
+
+                <!-- Page 6: Troubleshooting -->
+                <div class="manual-page">
+                    <h2>Troubleshooting</h2>
+                    <div class="guide-section">
+                        <h3>Common Errors</h3>
+                        <div class="guide-step"><span class="step-title">"Start a new month first"</span><p>Buttons are locked because the month has ended or hasn't started. Tap 'Start New Month' to unlock.</p></div>
+                        <div class="guide-step"><span class="step-title">"Safety Halt"</span><p>Your transaction is too large. It violates the Minimum Daily Limit for future days.</p></div>
+                        <div class="guide-step"><span class="step-title">"Limit is 0.00"</span><p>You have exhausted your daily allowance.</p></div>
+                        <div class="guide-step"><span class="step-title">"It will not leave any limit..."</span><p>Manual forecast edit rejected because it drains the pool below safety levels.</p></div>
+                        <div class="guide-step"><span class="step-title">"Limit too low"</span><p>Initialization rejected; starting pool cannot cover the Minimum Daily Limit for the month.</p></div>
+                        <div class="guide-step"><span class="step-title">"Error: Amount needs to be numbers"</span><p>Please enter a valid numeric value.</p></div>
+                    </div>
+                </div>
+
+                <!-- Page 7: About -->
+                <div class="manual-page">
+                    <h2>About</h2>
+                    <p style="color: var(--text-dim); margin-bottom: 15px;"><b>NeroSpendFoe v1.6.3</b></p>
+                    <p style="color: var(--text-dim); margin-bottom: 25px;">Concept & Code by <b>Saptarshi Kundu</b>.</p>
+                    <div class="guide-section">
+                        <h3>What's New</h3>
+                        <p style="color:var(--text-dim)">• Interactive Manual<br>• Smart Forecast Redistribution<br>• Enhanced Budget Safety Rails<br>• Grid Action Layout</p>
+                    </div>
+                </div>
+            </div>
             
-            <div class="guide-section">
-                <h3>Quick Start Guide</h3>
-                <div class="guide-step">
-                    <span class="step-title">1. Initialize Cycle</span>
-                    <p>Tap the New Month button. This will clear previous data and allow you to set your total monthly spending budget.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">2. Personalize Settings</span>
-                    <p>Tap the Gear icon to set your name, currency, and Next-Day Reset Policy. Ensure the policy matches your region for accurate daily resets.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">3. Daily Usage</span>
-                    <p>Enter every expense into the Transaction box. The system automatically redistributes remaining or overspent funds across the rest of the month.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">4. Income Adjustments</span>
-                    <p>If you receive extra money during the month, use the Add Funds button to inject it into your pool and boost your daily limits instantly.</p>
-                </div>
+            <div class="manual-nav">
+                <div class="nav-arrow" onclick="prevManualPage()">&#8592;</div>
+                <div class="nav-dots" id="manual-dots"></div>
+                <div class="nav-arrow" onclick="nextManualPage()">&#8594;</div>
             </div>
 
-            <div class="guide-section">
-                <h3>Transaction Entry</h3>
-                <div class="guide-step">
-                    <span class="step-title">Amount Input</span>
-                    <p>Enter the specific value of your expenditure in the Transaction box. This field only accepts numeric values.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">Confirm Spend</span>
-                    <p>Submits the transaction. The amount is instantly subtracted from your today's limit and the global pool.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">Save Shortcut</span>
-                    <p>Check this before confirming to remember recurring costs. Enter a label (e.g., Lunch), and a quick-log button will appear for one-tap entry.</p>
-                </div>
-            </div>
-
-            <div class="guide-section">
-                <h3>Dashboard Analytics</h3>
-                <div class="guide-step">
-                    <span class="step-title">Limit Today</span>
-                    <p>This is your live spendable balance for today. Overspending today reduces tomorrow's limit automatically.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">Total Pool Remaining</span>
-                    <p>Total amount left for the rest of the month. When this hits zero, spending is blocked by the safety floor.</p>
-                </div>
-            </div>
-
-            <div class="guide-section">
-                <h3>Settings (⚙️)</h3>
-                <div class="guide-step">
-                    <span class="step-title">Safety Liquidity Floor (Min Amount)</span>
-                    <p>Sets a hard reserve. The app blocks transactions that cause your total pool to dip into this reserve.</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">Velocity Weights (Mon - Sun)</span>
-                    <p>Define ratios for each day. Use higher numbers (e.g., 2.0) for days you spend more (weekends) to shift budget to those days.</p>
-                </div>
-            </div>
-
-            <div class="guide-section">
-                <h3>Installation</h3>
-                <div class="guide-step">
-                    <span class="step-title">Android & Desktop</span>
-                    <p>Tap your browser's (⋮) menu and select "Install app" or "Add to Home screen".</p>
-                </div>
-                <div class="guide-step">
-                    <span class="step-title">iOS</span>
-                    <p>Tap the system "Share" icon and select "Add to Home Screen".</p>
-                </div>
-            </div>
-
-            <button class="btn-main" onclick="closeOverlay('howto-overlay')">Got It</button>
+            <button class="btn-main" onclick="closeOverlay('howto-overlay')" style="margin-top:20px;">Close</button>
         </div>
     </div>
 
-    <!-- OVERLAYS -->
+    <!-- SETTINGS & OTHER OVERLAYS REMAIN SAME -->
     <div id="settings-overlay" class="overlay">
         <div class="overlay-content">
             <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('settings-overlay')">✕</span>
             <h2 style="margin-bottom: 30px;">Settings</h2>
-            <div class="form-group"><label>Identifier</label><input type="text" id="set-name" placeholder="User Name"></div>
+            <div class="form-group"><label>Display Name</label><input type="text" id="set-name" placeholder="User Name"></div>
+            <div class="form-group"><label>Currency</label><select id="set-currency" onchange="updateDynamicCurrencyLabels(this.value)"><option value="₹">₹ INR</option><option value="$">$ USD</option><option value="€">€ EUR</option><option value="£">£ GBP</option><option value="AED">AED</option><option value="C$">C$ CAD</option><option value="A$">A$ AUD</option><option value="S$">S$ SGD</option><option value="¥">¥ JPY</option><option value="CN¥">CN¥ CNY</option><option value="HK$">HK$ HKD</option><option value="Fr">Fr CHF</option><option value="NZ$">NZ$ NZD</option></select></div>
+            <div class="form-group"><label>Next-Day Reset Policy</label><select id="set-policy"><option value="indian">Indian (6:00 AM Reset)</option><option value="intl">Global (Midnight Reset)</option></select></div>
             <div class="form-group">
-                <label>Currency</label>
-                <select id="set-currency" onchange="updateDynamicCurrencyLabels(this.value)">
-                    <option value="₹">₹ INR</option>
-                    <option value="$">$ USD</option>
-                    <option value="€">€ EUR</option>
-                    <option value="£">£ GBP</option>
-                    <option value="AED">AED</option>
-                    <option value="C$">C$ CAD</option>
-                    <option value="A$">A$ AUD</option>
-                    <option value="S$">S$ SGD</option>
-                    <option value="¥">¥ JPY</option>
-                    <option value="CN¥">CN¥ CNY</option>
-                    <option value="HK$">HK$ HKD</option>
-                    <option value="Fr">Fr CHF</option>
-                    <option value="NZ$">NZ$ NZD</option>
-                </select>
+                <label>Minimum Daily Limit</label>
+                <div class="input-recess" style="padding: 10px 20px;">
+                    <input type="number" id="set-threshold" step="1" inputmode="decimal" style="font-size: 1.2rem;">
+                </div>
             </div>
             <div class="form-group">
-                <label>Next-Day Reset Policy</label>
-                <select id="set-policy">
-                    <option value="indian">Indian (6:00 AM Reset)</option>
-                    <option value="intl">Global (Midnight Reset)</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Safety Liquidity Floor (Min Amount)</label><input type="number" id="set-threshold" step="0.5" inputmode="decimal"></div>
-            <div class="form-group">
-                <label>Velocity Weights (Mon-Sun)</label>
-                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;">
-                    <input type="number" id="r0" class="compact-input" inputmode="decimal" placeholder="M">
-                    <input type="number" id="r1" class="compact-input" inputmode="decimal" placeholder="T">
-                    <input type="number" id="r2" class="compact-input" inputmode="decimal" placeholder="W">
-                    <input type="number" id="r3" class="compact-input" inputmode="decimal" placeholder="T">
-                    <input type="number" id="r4" class="compact-input" inputmode="decimal" placeholder="F">
-                    <input type="number" id="r5" class="compact-input" inputmode="decimal" placeholder="S">
-                    <input type="number" id="r6" class="compact-input" inputmode="decimal" placeholder="S">
+                <label>Limit Distribution Ratio</label>
+                <div class="data-table-container" style="background: var(--surface); border-radius: 20px; box-shadow: var(--in-shadow); padding: 10px 20px;">
+                    <div class="data-table-row" style="grid-template-columns: 1fr 1fr; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;">
+                        <span class="data-table-label">Monday</span>
+                        <input type="number" id="r0" class="table-edit-input" style="width: 80px; justify-self: end;">
+                    </div>
+                    <div class="data-table-row" style="grid-template-columns: 1fr 1fr; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;">
+                        <span class="data-table-label">Tuesday</span>
+                        <input type="number" id="r1" class="table-edit-input" style="width: 80px; justify-self: end;">
+                    </div>
+                    <div class="data-table-row" style="grid-template-columns: 1fr 1fr; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;">
+                        <span class="data-table-label">Wednesday</span>
+                        <input type="number" id="r2" class="table-edit-input" style="width: 80px; justify-self: end;">
+                    </div>
+                    <div class="data-table-row" style="grid-template-columns: 1fr 1fr; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;">
+                        <span class="data-table-label">Thursday</span>
+                        <input type="number" id="r3" class="table-edit-input" style="width: 80px; justify-self: end;">
+                    </div>
+                    <div class="data-table-row" style="grid-template-columns: 1fr 1fr; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;">
+                        <span class="data-table-label">Friday</span>
+                        <input type="number" id="r4" class="table-edit-input" style="width: 80px; justify-self: end;">
+                    </div>
+                    <div class="data-table-row" style="grid-template-columns: 1fr 1fr; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;">
+                        <span class="data-table-label">Saturday</span>
+                        <input type="number" id="r5" class="table-edit-input" style="width: 80px; justify-self: end;">
+                    </div>
+                    <div class="data-table-row" style="grid-template-columns: 1fr 1fr; border: none; padding: 10px 0;">
+                        <span class="data-table-label">Sunday</span>
+                        <input type="number" id="r6" class="table-edit-input" style="width: 80px; justify-self: end;">
+                    </div>
                 </div>
             </div>
             <button class="btn-main" onclick="saveSettings()">Sync System</button>
         </div>
     </div>
 
-    <div id="projection-overlay" class="overlay">
-        <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('projection-overlay')">✕</span><h2 style="margin-bottom: 20px;">Liquidity Forecast</h2><div id="projection-list"></div></div>
-    </div>
     <div id="fund-history-overlay" class="overlay">
-        <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('fund-history-overlay')">✕</span><h2 style="margin-bottom: 20px;">Fund History</h2><div id="fund-history-list" class="history-list"></div></div>
+        <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('fund-history-overlay')">✕</span><h2 style="margin-bottom: 20px;">Fund History</h2><div id="fund-history-list"></div></div>
     </div>
     <div id="spend-history-overlay" class="overlay">
-        <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('spend-history-overlay')">✕</span><h2 style="margin-bottom: 20px;">Spend History</h2><div class="total-exp-header"><div class="l">Total Expenditure</div><div class="v" id="total-spend-val">0.00</div></div><div id="spend-history-list" class="history-list"></div></div>
+        <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('spend-history-overlay')">✕</span><h2 style="margin-bottom: 20px;">Spend History</h2><div id="total-spend-val" style="font-size:1.5rem; font-weight:800; color:var(--primary); margin-bottom:20px;">0.00</div><div id="spend-history-list"></div></div>
     </div>
+
     <div id="adhoc-overlay" class="overlay">
-        <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('adhoc-overlay')">✕</span><h2 style="margin-bottom: 25px;">Top-up Funds</h2><div class="form-group"><label>Amount to Add</label><input type="number" id="input-adhoc" placeholder="0.00" inputmode="decimal"></div><button class="btn-main" onclick="handleAdHoc()">Top Up Global Pool</button></div>
+        <div class="overlay-content">
+            <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('adhoc-overlay')">✕</span><h2 style="margin-bottom: 25px;">Top-Up Monthly Limit</h2>
+            <div class="form-group">
+                <label>Amount to Add</label>
+                <div class="input-recess">
+                    <input type="number" id="input-adhoc" placeholder="0.00" inputmode="decimal">
+                </div>
+            </div>
+            <button class="btn-main" onclick="handleAdHoc()">Confirm Top-Up</button>
+        </div>
     </div>
+
     <div id="sync-confirm-overlay" class="overlay">
-        <div class="overlay-content" style="max-width: 400px;"><h2 style="margin-bottom: 15px;">New Month?</h2><p style="color: var(--text-dim); margin-bottom: 35px;">Starting a new month will remove old tracking data. This action cannot be undone.</p><button class="btn-main" onclick="confirmResetAndOpenInit()">Yes, Proceed</button><button class="btn-secondary" onclick="closeOverlay('sync-confirm-overlay')">Cancel</button></div>
+        <div class="overlay-content" style="max-width: 400px;">
+            <h2 style="margin-bottom: 15px;">Start New Month?</h2>
+            <p style="color: var(--text-dim); margin-bottom: 30px; font-size: 0.8rem;">Starting a new month will remove previous tracking data. This cannot be undone.</p>
+            <button class="btn-main" onclick="confirmResetAndOpenInit()">Yes, Proceed</button>
+            <button class="btn-secondary" onclick="closeOverlay('sync-confirm-overlay')">Cancel</button>
+        </div>
     </div>
+
     <div id="init-overlay" class="overlay">
-        <div class="overlay-content"><span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('init-overlay')">✕</span><h2 style="margin-bottom: 25px;">Initialize Cycle</h2><div class="form-group"><label>Starting Monthly Pool</label><input type="number" id="input-init-pool" placeholder="0.00" inputmode="decimal"></div><button class="btn-main" onclick="initializeMonth()">Set Nero Sync</button></div>
+        <div class="overlay-content">
+            <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('init-overlay')">✕</span>
+            <h2 style="margin-bottom: 25px;">Start New Month</h2>
+            <div class="form-group">
+                <label>Monthly Limit</label>
+                <div class="input-recess">
+                    <input type="number" id="input-init-pool" placeholder="0.00" inputmode="decimal">
+                </div>
+            </div>
+            <div id="carry-forward-container" class="form-group hidden" style="background: var(--surface); box-shadow: var(--in-shadow); padding: 25px; border-radius: 20px; margin-bottom: 35px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                    <label for="check-carry-forward" style="margin-bottom: 0; color: var(--text); font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                        Carry forward remaining <span id="val-carry-amount" style="color: var(--primary);">₹0.00</span>?
+                    </label>
+                    <input type="checkbox" id="check-carry-forward" class="custom-checkbox">
+                </div>
+            </div>
+            <button class="btn-main" onclick="initializeMonth()">Set Nero Sync</button>
+        </div>
+    </div>
+    <div id="projection-overlay" class="overlay">
+        <div class="overlay-content">
+            <span style="float:right; cursor:pointer; font-size: 1.8rem;" onclick="closeOverlay('projection-overlay')">✕</span>
+            <h2 style="margin-bottom: 20px;">Monthly Limit Forecast</h2>
+            <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 25px; line-height: 1.4;">Future limits can be increased or decreased when not 0.00.</p>
+            <div id="projection-list"></div>
+        </div>
     </div>
 
     <script>
-        // --- CORE STATE ---
-        let state = JSON.parse(localStorage.getItem('nero_spend_foe_v8')) || {
+        // UNIFIED STORAGE KEY V1.6.3
+        const STORAGE_KEY = 'nero_sync_v1_6_3';
+
+        let state = {
             name: "", currency: "₹", policy: "indian", pool: 0, 
-            threshold: 1.0, 
-            ratios: [1, 1, 1, 1, 1, 2, 2], 
-            templates: [], lockedAllowance: 0,
-            dailyBaselinePool: 0, spentToday: 0, lastResetDate: null,
-            fundHistory: [], spendHistory: [], dailyStats: []
+            threshold: 100.0, ratios: [1, 1, 1, 1, 1, 2, 2], templates: [], 
+            lockedAllowance: 0, dailyBaselinePool: 0, spentToday: 0, 
+            lastResetDate: null, fundHistory: [], spendHistory: [], dailyStats: [],
+            overrides: {}, lastUsedShortcut: null, monthStartPool: 0, unitsAtStart: 1
         };
 
-        const save = () => { localStorage.setItem('nero_spend_foe_v8', JSON.stringify(state)); refreshUI(); };
-        const getEffectiveDate = () => { let now = new Date(); if (state.policy === 'indian') now.setHours(now.getHours() - 6); return now; };
-        const validateNumeric = (val, field) => { if (val === "" || isNaN(parseFloat(val))) { notify(`Error: ${field} requires numbers`, "danger"); return false; } return true; };
+        try {
+            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+            if (saved) {
+                state = { ...state, ...saved };
+                if (!Array.isArray(state.ratios) || state.ratios.length !== 7) state.ratios = [1, 1, 1, 1, 1, 2, 2];
+            }
+        } catch (e) {
+            console.log("Storage reset due to corruption");
+            localStorage.removeItem(STORAGE_KEY);
+        }
 
-        const updateDynamicCurrencyLabels = (newCurrency) => {
-            document.querySelectorAll('.dynamic-currency').forEach(el => { el.innerText = newCurrency; });
+        const save = (noRefresh) => { 
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); 
+            if (!noRefresh) refreshUI(); 
+        };
+        
+        const getEffectiveDate = () => { let now = new Date(); if (state.policy === 'indian') now.setHours(now.getHours() - 6); return now; };
+        const validateNumeric = (val, field) => { if (val === "" || isNaN(parseFloat(val))) { notify(`Error: ${field} needs to be numbers`, "danger"); return false; } return true; };
+        const updateDynamicCurrencyLabels = (newCurrency) => { document.querySelectorAll('.dynamic-currency').forEach(el => { el.innerText = newCurrency; }); };
+
+        const isMonthStale = () => {
+            if (!state.lastResetDate) return true;
+            const last = new Date(state.lastResetDate);
+            const now = getEffectiveDate();
+            return (now.getMonth() !== last.getMonth() || now.getFullYear() !== last.getFullYear());
+        };
+
+        const getTotalMonthUnits = () => {
+            const now = getEffectiveDate();
+            const last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            let units = 0;
+            for (let d = 1; d <= last; d++) {
+                units += (state.ratios[(new Date(now.getFullYear(), now.getMonth(), d).getDay() + 6) % 7] || 1);
+            }
+            return units;
         };
 
         const getRemainingUnits = (includeToday) => {
             const now = getEffectiveDate();
-            const year = now.getFullYear();
-            const month = now.getMonth();
-            const last = new Date(year, month + 1, 0).getDate();
+            const last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
             let units = 0;
             const start = includeToday ? now.getDate() : now.getDate() + 1;
             for (let d = start; d <= last; d++) {
-                units += state.ratios[(new Date(year, month, d).getDay() + 6) % 7] || 1;
+                units += (state.ratios[(new Date(now.getFullYear(), now.getMonth(), d).getDay() + 6) % 7] || 1);
             }
             return units;
         };
@@ -427,223 +578,475 @@
             const now = getEffectiveDate();
             const dateStr = now.toDateString();
             if (state.lastResetDate && state.lastResetDate !== dateStr) {
-                state.dailyStats.push({ date: state.lastResetDate, limit: state.lockedAllowance, spent: state.spentToday });
-                recalculateAllowance();
+                if (!isMonthStale()) {
+                    state.dailyStats.push({ date: state.lastResetDate, limit: state.lockedAllowance, spent: state.spentToday });
+                }
                 state.spentToday = 0;
                 state.dailyBaselinePool = state.pool;
                 state.lastResetDate = dateStr;
-                save();
+                recalculateAllowance();
+                save(true);
             } else if (!state.lastResetDate) {
-                state.lastResetDate = dateStr;
-                save();
+                // Do not auto-initialize date. Wait for manual start.
             }
         };
 
         const recalculateAllowance = () => {
-            const total = getRemainingUnits(true);
-            const ratio = state.ratios[(getEffectiveDate().getDay() + 6) % 7];
-            if (total > 0) state.lockedAllowance = (state.pool / total) * ratio;
+            if (isMonthStale()) { state.lockedAllowance = 0; return; }
+            const now = getEffectiveDate();
+            const todayKey = now.toDateString();
+            if (state.overrides && state.overrides[todayKey] !== undefined) {
+                state.lockedAllowance = state.overrides[todayKey];
+            } else {
+                const remUnitsTotal = getRemainingUnits(true);
+                let unitsOverridden = 0; let totalOverriddenValue = 0;
+                for (const dStr in state.overrides) {
+                    const dObj = new Date(dStr);
+                    if (dObj.getMonth() === now.getMonth() && dObj.getDate() >= now.getDate()) {
+                        unitsOverridden += (state.ratios[(dObj.getDay() + 6) % 7] || 1);
+                        totalOverriddenValue += state.overrides[dStr];
+                    }
+                }
+                const unitsAuto = Math.max(0, remUnitsTotal - unitsOverridden);
+                const poolAuto = Math.max(0, state.pool - totalOverriddenValue);
+                const autoRate = unitsAuto > 0 ? (poolAuto / unitsAuto) : 0;
+                state.lockedAllowance = autoRate * (state.ratios[(now.getDay() + 6) % 7] || 1);
+            }
+        };
+
+        const refreshUI = () => {
+            resetDaily(); 
+            forceRecalc();
+            
+            const now = getEffectiveDate();
+            const stale = isMonthStale();
+            const inactive = state.pool === 0 && !state.lastResetDate;
+
+            const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
+            
+            setTxt('greeting-line1', `Hi ${state.name || "User"},`);
+            setTxt('display-date', now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }));
+            
+            const target = new Date(now); target.setHours(24 + (state.policy === 'indian' ? 6 : 0), 0, 0, 0);
+            const diff = target - new Date();
+            const h = Math.max(0, Math.floor(diff / 3600000));
+            const m = Math.max(0, Math.floor((diff % 3600000) / 60000));
+            const s = Math.max(0, Math.floor((diff % 60000) / 1000));
+            setTxt('display-timer', stale ? "CYCLE ENDED" : `${h}h ${m}m ${s}s`);
+
+            const leftover = (stale || inactive) ? 0 : (state.lockedAllowance - state.spentToday);
+            const availEl = document.getElementById('val-available');
+            if (availEl) {
+                availEl.innerText = `${state.currency}${leftover.toFixed(2)}`;
+                availEl.style.color = (leftover < -0.01 && !stale) ? 'var(--danger)' : 'var(--primary)';
+            }
+            
+            setTxt('val-spent', `${state.currency}${state.spentToday.toFixed(2)}`);
+            
+            const theoreticalBaseRate = (state.monthStartPool || 0) / (state.unitsAtStart || 1);
+            const origDailyLimit = theoreticalBaseRate * (state.ratios[(now.getDay() + 6) % 7] || 1);
+
+            setTxt('val-original-daily', `${state.currency}${ (stale || inactive) ? '0.00' : origDailyLimit.toFixed(2)}`);
+            setTxt('val-total-pool', `${state.currency}${ (stale || inactive) ? '0.00' : state.pool.toFixed(2)}`);
+            
+            const overEl = document.getElementById('overspend-status-text');
+            if (overEl) overEl.style.display = (leftover < -0.01 && !stale && !inactive) ? 'block' : 'none';
+            
+            const bTopup = document.getElementById('btn-topup-main-act');
+            const bForecast = document.getElementById('btn-forecast-main-act');
+            const bFundHist = document.getElementById('btn-fund-history-act');
+            
+            if (bTopup) bTopup.classList.toggle('disabled-look', stale || inactive);
+            if (bForecast) bForecast.classList.toggle('disabled-look', stale || inactive);
+            if (bFundHist) bFundHist.classList.toggle('disabled-look', stale || inactive);
+
+            updateDynamicCurrencyLabels(state.currency);
+
+            const ql = document.getElementById('quick-logs');
+            if (ql) {
+                ql.innerHTML = '';
+                state.templates.slice(-4).forEach(t => {
+                    const b = document.createElement('button'); b.className = 'quick-btn';
+                    b.innerText = `${t.name} (${t.val})`;
+                    if (stale || inactive) b.disabled = true;
+                    b.onclick = () => {
+                        const inputS = document.getElementById('input-spend');
+                        if (inputS) inputS.value = t.val;
+                        state.lastUsedShortcut = t.name;
+                    };
+                    ql.appendChild(b);
+                });
+            }
+        };
+
+        const forceRecalc = () => {
+             if (isMonthStale()) { state.lockedAllowance = 0; return; }
+            const now = getEffectiveDate();
+            const todayKey = now.toDateString();
+            if (state.overrides && state.overrides[todayKey] !== undefined) {
+                state.lockedAllowance = state.overrides[todayKey];
+            } else {
+                const remUnitsTotal = getRemainingUnits(true);
+                let unitsOverridden = 0; let totalOverriddenValue = 0;
+                for (const dStr in state.overrides) {
+                    const dObj = new Date(dStr);
+                    if (dObj.getMonth() === now.getMonth() && dObj.getDate() >= now.getDate()) {
+                        unitsOverridden += (state.ratios[(dObj.getDay() + 6) % 7] || 1);
+                        totalOverriddenValue += state.overrides[dStr];
+                    }
+                }
+                const unitsAuto = Math.max(0, remUnitsTotal - unitsOverridden);
+                const poolAuto = Math.max(0, state.pool - totalOverriddenValue);
+                const autoRate = unitsAuto > 0 ? (poolAuto / unitsAuto) : 0;
+                state.lockedAllowance = autoRate * (state.ratios[(now.getDay() + 6) % 7] || 1);
+            }
+        };
+
+        const handleAdHocWrapper = () => {
+            if (isMonthStale() || (state.pool === 0 && !state.lastResetDate)) { 
+                notify("Start a new month first.", "danger"); return; 
+            }
+            openOverlay('adhoc-overlay');
+        };
+        
+        const handleFundHistoryWrapper = () => {
+            if (isMonthStale() || (state.pool === 0 && !state.lastResetDate)) { 
+                notify("Start a new month first.", "danger"); return; 
+            }
+            openOverlay('fund-history-overlay');
+        };
+
+        const handleForecastWrapper = () => {
+            if (isMonthStale() || (state.pool === 0 && !state.lastResetDate)) { 
+                notify("Start a new month first.", "danger"); return; 
+            }
+            openOverlay('projection-overlay');
         };
 
         const handleSpending = () => {
-            const raw = document.getElementById('input-spend').value;
+            if (isMonthStale()) { notify("Cycle ended. Start New Month.", "danger"); return; }
+            const inputS = document.getElementById('input-spend');
+            const raw = inputS ? inputS.value : "";
             if (!validateNumeric(raw, "Amount")) return;
             const val = parseFloat(raw);
             if (val <= 0) return;
-            const safety = state.threshold * getRemainingUnits(true);
-            if ((state.pool - val) < (safety - 0.01)) { 
-                const maxAvailable = Math.max(0, state.pool - safety);
-                notify(`Safety Halt: Max spendable is ${state.currency}${maxAvailable.toFixed(2)}`, "danger"); 
-                return; 
+            
+            if (state.lockedAllowance <= 0.01 && state.pool <= 0.01) { notify("Limit is 0.00", "danger"); return; }
+            
+            const safetyFloor = state.threshold * getRemainingUnits(false);
+            if ((state.pool - val) < (safetyFloor - 0.01)) { 
+                notify("It will not leave any limit for the other days.", "danger"); return; 
             }
-            state.spentToday += val;
-            state.pool -= val;
-            state.spendHistory.push({ amount: val, date: new Date().toISOString() });
-            if (document.getElementById('check-save-template').checked) {
-                const n = document.getElementById('input-template-name').value.trim() || val.toString();
-                state.templates.push({ name: n, val: val });
+            
+            let finalLabel = "";
+            const chkSave = document.getElementById('check-save-template');
+            if (chkSave && chkSave.checked) {
+                const tName = document.getElementById('input-template-name');
+                finalLabel = tName ? tName.value.trim() : "";
+                state.templates.push({ name: finalLabel || val.toString(), val: val });
+            } else {
+                finalLabel = state.lastUsedShortcut || "";
             }
-            document.getElementById('input-spend').value = '';
-            document.getElementById('check-save-template').checked = false;
-            document.getElementById('input-template-name').classList.add('hidden');
-            save();
-            notify("Transaction Saved", "primary");
+
+            state.spentToday += val; state.pool -= val;
+            state.spendHistory.push({ amount: val, date: new Date().toISOString(), label: finalLabel });
+            
+            if (inputS) inputS.value = '';
+            if (chkSave) chkSave.checked = false;
+            const tInWrap = document.getElementById('input-template-name');
+            if (tInWrap) tInWrap.classList.add('hidden');
+            state.lastUsedShortcut = null;
+            
+            save(); notify("Saved", "primary");
         };
 
         const handleAdHoc = () => {
-            const raw = document.getElementById('input-adhoc').value;
-            if (!validateNumeric(raw, "Top-up")) return;
+            const inputA = document.getElementById('input-adhoc');
+            const raw = inputA ? inputA.value : "";
+            if (!validateNumeric(raw, "Amount")) return;
             const val = parseFloat(raw);
-            state.pool += val;
-            state.dailyBaselinePool += val;
+            state.pool += val; state.dailyBaselinePool += val;
             state.fundHistory.push({ type: 'Top-up', amount: val, date: new Date().toISOString() });
-            recalculateAllowance();
-            closeOverlay('adhoc-overlay');
-            save();
-            notify("Top-up Recorded", "primary");
+            save(); closeOverlay('adhoc-overlay'); 
+            notify("Limit Topped Up", "primary");
         };
 
-        const confirmResetAndOpenInit = () => { closeOverlay('sync-confirm-overlay'); openOverlay('init-overlay'); };
+        const confirmResetAndOpenInit = () => { 
+            closeOverlay('sync-confirm-overlay'); 
+            openOverlay('init-overlay'); 
+        };
 
         const initializeMonth = () => {
-            const raw = document.getElementById('input-init-pool').value;
-            if (!validateNumeric(raw, "Monthly Pool")) return;
-            const val = parseFloat(raw);
-            state.pool = val;
-            state.dailyBaselinePool = val;
+            const inputI = document.getElementById('input-init-pool');
+            const raw = inputI ? inputI.value : "";
+            if (!validateNumeric(raw, "Monthly Limit")) return;
+            let baseVal = parseFloat(raw);
+            let finalVal = baseVal;
+            
+            const carryCheck = document.getElementById('check-carry-forward');
+            if (carryCheck && carryCheck.checked) {
+                finalVal += Math.max(0, state.pool);
+            }
+
+            const remUnitsNow = getRemainingUnits(true);
+            const minRequired = remUnitsNow * state.threshold;
+            if (finalVal < minRequired - 0.01) {
+                notify(`Limit too low. Minimum required is ${state.currency}${minRequired.toFixed(2)}.`, "danger");
+                return;
+            }
+
+            state.monthStartPool = finalVal;
+            state.pool = finalVal; 
+            state.unitsAtStart = getRemainingUnits(true); // Fixed Anchor
+            state.dailyBaselinePool = finalVal; 
             state.spentToday = 0;
-            state.fundHistory = [{ type: 'Initial Pool', amount: val, date: new Date().toISOString() }];
-            state.spendHistory = [];
-            state.dailyStats = [];
+            state.fundHistory.push({ type: 'Month Started', amount: baseVal, date: new Date().toISOString() });
+            if (carryCheck && carryCheck.checked && finalVal > baseVal) {
+                state.fundHistory.push({ type: 'Carry Forward', amount: finalVal - baseVal, date: new Date().toISOString() });
+            }
+            state.spendHistory = []; state.dailyStats = []; state.overrides = {};
             state.lastResetDate = getEffectiveDate().toDateString();
-            recalculateAllowance();
-            closeOverlay('init-overlay');
-            save();
-            notify("Month Initialized", "primary");
+            closeOverlay('init-overlay'); save();
+            notify("New Month Started", "primary");
         };
 
         const notify = (msg, type) => {
-            const n = document.getElementById('notification');
-            if(!n) return;
-            n.innerText = msg;
-            n.style.background = type === "primary" ? "var(--primary)" : "var(--danger)";
+            const n = document.getElementById('notification'); if(!n) return;
+            n.innerText = msg; n.style.background = type === "primary" ? "var(--primary)" : "var(--danger)";
             n.style.color = type === "primary" ? "#000" : "#FFF";
-            n.style.display = 'block';
-            setTimeout(() => n.style.display = 'none', 3000);
+            n.style.display = 'block'; setTimeout(() => n.style.display = 'none', 3000);
         };
 
         const openOverlay = (id) => {
-            document.getElementById(id).style.display = 'block';
+            const overlay = document.getElementById(id);
+            if (overlay) overlay.style.display = 'block';
+            
             if (id === 'settings-overlay') {
-                document.getElementById('set-name').value = state.name;
-                document.getElementById('set-currency').value = state.currency;
-                document.getElementById('set-policy').value = state.policy;
-                document.getElementById('set-threshold').value = state.threshold;
-                updateDynamicCurrencyLabels(state.currency); 
-                state.ratios.forEach((r, i) => {
-                    const el = document.getElementById('r' + i);
-                    if (el) el.value = r;
-                });
+                const sN = document.getElementById('set-name'); if(sN) sN.value = state.name;
+                const sC = document.getElementById('set-currency'); if(sC) sC.value = state.currency;
+                const sP = document.getElementById('set-policy'); if(sP) sP.value = state.policy;
+                const sT = document.getElementById('set-threshold'); if(sT) sT.value = state.threshold;
+                [0,1,2,3,4,5,6].forEach(i => { const rIn = document.getElementById(`r${i}`); if(rIn) rIn.value = state.ratios[i]; });
             } else if (id === 'projection-overlay') renderProjection();
             else if (id === 'fund-history-overlay') renderFundHistory();
             else if (id === 'spend-history-overlay') renderSpendHistory();
-            else if (id === 'howto-overlay') updateDynamicCurrencyLabels(state.currency);
+            else if (id === 'init-overlay') {
+                const carryContainer = document.getElementById('carry-forward-container');
+                const carryValText = document.getElementById('val-carry-amount');
+                if (state.pool > 0) {
+                    if (carryContainer) carryContainer.classList.remove('hidden');
+                    if (carryValText) carryValText.innerText = `${state.currency}${state.pool.toFixed(2)}`;
+                } else {
+                    if (carryContainer) carryContainer.classList.add('hidden');
+                }
+            } else if (id === 'howto-overlay') {
+                // Initialize Manual Pagination
+                currentManualPage = 0;
+                updateManualUI();
+            }
         };
 
-        const closeOverlay = (id) => document.getElementById(id).style.display = 'none';
+        const closeOverlay = (id) => { const el = document.getElementById(id); if (el) el.style.display = 'none'; };
 
         const saveSettings = () => {
-            if (!validateNumeric(document.getElementById('set-threshold').value, "Floor")) return;
-            for (let i=0; i<7; i++) if (!validateNumeric(document.getElementById(`r${i}`).value, `Day ${i}`)) return;
+            const threshI = document.getElementById('set-threshold');
+            if (!validateNumeric(threshI.value, "Minimum Limit")) return;
             state.name = document.getElementById('set-name').value.trim();
             state.currency = document.getElementById('set-currency').value;
             state.policy = document.getElementById('set-policy').value;
-            state.threshold = parseFloat(document.getElementById('set-threshold').value);
-            state.ratios = state.ratios.map((_, i) => parseFloat(document.getElementById(`r${i}`).value));
-            recalculateAllowance();
-            save();
-            closeOverlay('settings-overlay');
-            notify("Settings Saved", "primary");
+            state.threshold = parseFloat(threshI.value);
+            state.ratios = [0,1,2,3,4,5,6].map(i => { const rI = document.getElementById(`r${i}`); return rI ? parseFloat(rI.value) : 1; });
+            save(); closeOverlay('settings-overlay'); notify("Synced", "primary");
         };
 
+        // --- Manual Pagination Logic ---
+        let currentManualPage = 0;
+        const totalManualPages = 9; 
+
+        function updateManualUI() {
+            document.querySelectorAll('.manual-page').forEach((el, i) => {
+                el.classList.toggle('active', i === currentManualPage);
+            });
+            const dotsContainer = document.getElementById('manual-dots');
+            dotsContainer.innerHTML = '';
+            for(let i=0; i<totalManualPages; i++) {
+                const dot = document.createElement('div');
+                dot.className = `nav-dot ${i === currentManualPage ? 'active' : ''}`;
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function nextManualPage() {
+            if (currentManualPage < totalManualPages - 1) {
+                currentManualPage++;
+                updateManualUI();
+            }
+        }
+
+        function prevManualPage() {
+            if (currentManualPage > 0) {
+                currentManualPage--;
+                updateManualUI();
+            }
+        }
+
+        // Open manual shortcut
+        function openManual() {
+            openOverlay('howto-overlay');
+        }
+        
+        // Touch handling for manual swipe
+        let touchStartX = 0;
+        const manualCont = document.getElementById('manual-container');
+        if (manualCont) {
+            manualCont.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            manualCont.addEventListener('touchend', e => {
+                const touchEndX = e.changedTouches[0].screenX;
+                if (touchEndX < touchStartX - 50) nextManualPage();
+                if (touchEndX > touchStartX + 50) prevManualPage();
+            });
+        }
+
         const renderFundHistory = () => {
-            const list = document.getElementById('fund-history-list');
-            list.innerHTML = state.fundHistory.length ? '' : '<p style="color:var(--text-dim)">No records found.</p>';
+            const container = document.getElementById('fund-history-list');
+            if (!container) return;
+            container.innerHTML = '<div class="data-table-container"><div class="data-table-header" style="grid-template-columns: 1.5fr 1fr;"><span>Event • Date</span><span style="text-align:right">Amount</span></div></div>';
+            const table = container.querySelector('.data-table-container');
+            if (!state.fundHistory.length) { container.innerHTML = '<p style="color:var(--text-dim)">No records found.</p>'; return; }
             state.fundHistory.slice().reverse().forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `<div><span class="h-label">${item.type}</span><span class="h-meta">${new Date(item.date).toLocaleString()}</span></div><span class="h-val">${state.currency}${item.amount.toFixed(2)}</span>`;
-                list.appendChild(div);
+                const row = document.createElement('div');
+                row.className = 'data-table-row'; row.style.gridTemplateColumns = '1.5fr 1fr';
+                const dateLabel = new Date(item.date).toLocaleDateString([], {day: 'numeric', month: 'short'});
+                row.innerHTML = `<span class="data-table-label" style="font-size:0.8rem;">${item.type} • ${dateLabel}</span><span class="data-table-val">${state.currency}${item.amount.toFixed(2)}</span>`;
+                table.appendChild(row);
             });
         };
 
         const renderSpendHistory = () => {
             const list = document.getElementById('spend-history-list');
+            if (!list) return;
             const totalVal = state.spendHistory.reduce((acc, curr) => acc + curr.amount, 0);
-            document.getElementById('total-spend-val').innerText = `${state.currency}${totalVal.toFixed(2)}`;
+            const totalValEl = document.getElementById('total-spend-val');
+            if (totalValEl) totalValEl.innerText = `${state.currency}${totalVal.toFixed(2)}`;
             list.innerHTML = '';
-            const grouped = {};
-            state.spendHistory.forEach(s => { const d = new Date(s.date).toDateString(); if (!grouped[d]) grouped[d] = { txns: [], stats: null }; grouped[d].txns.push(s); });
-            state.dailyStats.forEach(stat => { if (!grouped[stat.date]) grouped[stat.date] = { txns: [], stats: stat }; else grouped[stat.date].stats = stat; });
-            const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
-            if (!sortedDates.length) { list.innerHTML = '<p style="color:var(--text-dim)">No records found.</p>'; return; }
-            sortedDates.forEach(date => {
-                const group = grouped[date];
-                const section = document.createElement('div');
-                section.className = 'day-group';
-                section.innerHTML = `<div class="day-header"><span class="d-title" style="color:var(--primary); font-weight:800;">${date}</span><div style="font-size:0.6rem; color:var(--text-dim); margin-top:4px;">${group.stats ? `Limit: ${state.currency}${group.stats.limit.toFixed(2)} | Spent: ${state.currency}${group.stats.spent.toFixed(2)}` : 'Active Day'}</div></div>`;
-                group.txns.slice().reverse().forEach(t => {
-                    const txn = document.createElement('div');
-                    txn.className = 'history-item'; txn.style.border = 'none'; txn.style.padding = '8px 0';
-                    txn.innerHTML = `<span class="h-meta">${new Date(t.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span><span class="h-val" style="font-size:0.9rem">${state.currency}${t.amount.toFixed(2)}</span>`;
-                    section.appendChild(txn);
-                });
-                list.appendChild(section);
+            
+            // Render Flat List
+            const tableContainer = document.createElement('div');
+            tableContainer.className = 'data-table-container';
+            tableContainer.innerHTML = `<div class="data-table-header" style="grid-template-columns: 1.5fr 1fr;"><span>Date • Time • Note</span><span style="text-align:right">Amount</span></div>`;
+            
+            if (!state.spendHistory.length) { list.innerHTML = '<p style="color:var(--text-dim)">No records found.</p>'; return; }
+            
+            // Sort by Date Descending
+            const sortedHistory = state.spendHistory.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            sortedHistory.forEach(t => {
+                const row = document.createElement('div'); 
+                row.className = 'data-table-row'; 
+                row.style.gridTemplateColumns = '1.5fr 1fr';
+                
+                const dObj = new Date(t.date);
+                const dateStr = dObj.toLocaleDateString([], { day: 'numeric', month: 'short' });
+                const timeStr = dObj.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
+                const labelStr = t.label ? ` • ${t.label}` : '';
+                
+                row.innerHTML = `<span class="data-table-label" style="font-weight:400; font-size:0.75rem;">${dateStr} • ${timeStr}${labelStr}</span><span class="data-table-val" style="font-size:0.85rem;">${state.currency}${t.amount.toFixed(2)}</span>`;
+                tableContainer.appendChild(row);
             });
-        };
-
-        const refreshUI = () => {
-            resetDaily(); 
-            const now = getEffectiveDate();
-            const displayName = state.name || "User";
-            document.getElementById('greeting-line1').innerText = `Hi ${displayName},`;
-            document.getElementById('display-date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-            
-            const target = new Date(now);
-            const policyOffset = state.policy === 'indian' ? 6 : 0;
-            target.setHours(24 + policyOffset, 0, 0, 0);
-            
-            const realNow = new Date();
-            const diff = target - realNow;
-            const h = Math.max(0, Math.floor(diff / 3600000));
-            const m = Math.max(0, Math.floor((diff % 3600000) / 60000));
-            const s = Math.max(0, Math.floor((diff % 60000) / 1000));
-            document.getElementById('display-timer').innerText = `${h}h ${m}m ${s}s`;
-
-            const leftover = state.lockedAllowance - state.spentToday;
-            document.getElementById('val-available').innerText = `${state.currency}${leftover.toFixed(2)}`;
-            document.getElementById('val-spent').innerText = `${state.currency}${state.spentToday.toFixed(2)}`;
-            document.getElementById('val-original-daily').innerText = `${state.currency}${state.lockedAllowance.toFixed(2)}`;
-            document.getElementById('val-total-pool').innerText = `${state.currency}${state.pool.toFixed(2)}`;
-            document.getElementById('val-available').style.color = leftover < -0.01 ? 'var(--danger)' : 'var(--primary)';
-            document.getElementById('overspend-status-text').style.display = leftover < -0.01 ? 'block' : 'none';
-            
-            updateDynamicCurrencyLabels(state.currency);
-
-            const ql = document.getElementById('quick-logs');
-            ql.innerHTML = '';
-            state.templates.slice(-4).forEach(t => {
-                const b = document.createElement('button');
-                b.className = 'quick-btn';
-                b.innerText = `${t.name} (${t.val})`;
-                b.onclick = () => document.getElementById('input-spend').value = t.val;
-                ql.appendChild(b);
-            });
+            list.appendChild(tableContainer);
         };
 
         const renderProjection = () => {
             const container = document.getElementById('projection-list');
-            container.innerHTML = '';
-            const now = getEffectiveDate();
-            const remToday = getRemainingUnits(true);
-            const futUnits = getRemainingUnits(false);
-            const baselineRate = remToday > 0 ? (state.dailyBaselinePool / remToday) : 0;
-            const perfToday = (baselineRate * (state.ratios[(now.getDay() + 6) % 7] || 1)) - state.spentToday;
-            let curRate = perfToday < -0.01 ? (futUnits > 0 ? (state.pool / futUnits) : 0) : (remToday > 0 ? (state.pool / remToday) : baselineRate);
-            for (let d = now.getDate() + 1; d <= new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); d++) {
+            if (!container) return;
+            container.innerHTML = '<div class="data-table-container"><div class="data-table-header" style="grid-template-columns: 1.2fr 1fr 1fr;"><span>Date</span><span style="text-align:right">Original</span><span style="text-align:right">Current</span></div></div>';
+            const table = container.querySelector('.data-table-container');
+            const now = getEffectiveDate(); const stale = isMonthStale();
+            const last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            
+            const remUnitsTotal = getRemainingUnits(true);
+            let unitsOverridden = 0; let totalOverriddenValue = 0;
+            for (const dStr in state.overrides) {
+                const dObj = new Date(dStr);
+                if (dObj.getMonth() === now.getMonth() && dObj.getDate() >= now.getDate()) {
+                    unitsOverridden += (state.ratios[(dObj.getDay() + 6) % 7] || 1);
+                    totalOverriddenValue += state.overrides[dStr];
+                }
+            }
+            const autoRate = (remUnitsTotal - unitsOverridden) > 0 ? ((state.pool - totalOverriddenValue) / (remUnitsTotal - unitsOverridden)) : 0;
+            const theoreticalBaseRate = (state.monthStartPool || 0) / (state.unitsAtStart || 1);
+
+            for (let d = now.getDate(); d <= last; d++) {
                 let dObj = new Date(now.getFullYear(), now.getMonth(), d);
-                let r = state.ratios[(dObj.getDay() + 6) % 7] || 1;
-                const row = document.createElement('div');
-                row.style.display = 'flex'; row.style.justifyContent = 'space-between'; row.style.padding = '12px 0'; row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
-                row.innerHTML = `<span style="font-size:0.8rem; color:var(--text);">${dObj.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}</span><span style="color:var(--primary); font-weight:800;">${state.currency}${(curRate * r).toFixed(2)}</span>`;
-                container.appendChild(row);
+                let dateKey = dObj.toDateString(); let dOfWeek = (dObj.getDay() + 6) % 7;
+                let r = state.ratios[dOfWeek] || 1;
+                
+                let origVal = state.overrides[dateKey] !== undefined ? state.overrides[dateKey] : (theoreticalBaseRate * r);
+                let liveVal = (stale) ? 0 : (state.overrides[dateKey] !== undefined ? state.overrides[dateKey] : ((d === now.getDate()) ? state.lockedAllowance : (autoRate * r)));
+                const isZero = liveVal < 0.01;
+
+                const row = document.createElement('div'); row.className = 'data-table-row';
+                row.style.gridTemplateColumns = '1.2fr 1fr 1fr';
+                const label = (d === now.getDate() && !stale) ? "Today" : dObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                
+                row.innerHTML = `
+                    <span class="data-table-label" style="font-size:0.75rem;">${label}</span>
+                    <div class="data-table-val" id="cell-orig-${d}">
+                        <span style="cursor:pointer; color:var(--primary);" onclick="toggleEdit(${d}, '${dateKey}', ${origVal}, ${dOfWeek}, ${stale})">${origVal.toFixed(2)}</span>
+                    </div>
+                    <span class="data-table-val" style="color:var(--text-dim); font-size:0.8rem; font-weight:400;">${liveVal.toFixed(2)}</span>`;
+                table.appendChild(row);
             }
         };
 
-        document.getElementById('check-save-template').onchange = (e) => {
-            const box = document.getElementById('input-template-name');
-            if (e.target.checked) { box.classList.remove('hidden'); box.focus(); } else box.classList.add('hidden');
+        const toggleEdit = (day, dateKey, val, dayOfWeek, disabled) => {
+            if (disabled) return;
+            const container = document.getElementById(`cell-orig-${day}`);
+            if (!container) return;
+            container.innerHTML = `<input type="number" class="table-edit-input" value="${val.toFixed(2)}" inputmode="decimal" step="0.01" onblur="handleSmartRedistribute('${dateKey}', this.value, ${dayOfWeek})" onkeydown="if(event.key==='Enter') this.blur()">`;
+            const inputE = container.querySelector('input'); if (inputE) inputE.focus();
         };
+
+        const handleSmartRedistribute = (targetDateKey, newVal, dayOfWeek) => {
+            const desiredLimit = parseFloat(newVal);
+            if (isNaN(desiredLimit) || desiredLimit < 0) { renderProjection(); return; }
+            const now = getEffectiveDate();
+            const totalRemainingWeights = getRemainingUnits(true);
+            const tempOverrides = { ...state.overrides, [targetDateKey]: desiredLimit };
+            
+            let totalOverrideVal = 0; let totalOverrideWeight = 0;
+            for (const key in tempOverrides) {
+                const d = new Date(key);
+                if (d.getMonth() === now.getMonth() && d.getDate() >= now.getDate()) {
+                    totalOverrideVal += tempOverrides[key];
+                    totalOverrideWeight += (state.ratios[(d.getDay() + 6) % 7] || 1);
+                }
+            }
+            const weightOthers = totalRemainingWeights - totalOverrideWeight;
+            const poolOthers = state.pool - totalOverrideVal;
+
+            if (weightOthers > 0) {
+                if ((poolOthers / weightOthers) < state.threshold - 0.01) {
+                    notify("It will not leave any limit for the other days.", "danger");
+                    renderProjection(); return;
+                }
+            } else if (poolOthers < -0.01) {
+                notify("It will not leave any limit for the other days.", "danger");
+                renderProjection(); return;
+            }
+            state.overrides[targetDateKey] = desiredLimit;
+            recalculateAllowance(); save(); notify("Plan Adjusted", "primary"); renderProjection();
+        };
+
+        const chkSTpl = document.getElementById('check-save-template');
+        if (chkSTpl) {
+            chkSTpl.onchange = (e) => {
+                const b = document.getElementById('input-template-name');
+                if (b) { if (e.target.checked) { b.classList.remove('hidden'); b.focus(); } else b.classList.add('hidden'); }
+            };
+        }
 
         window.onload = () => { refreshUI(); setInterval(refreshUI, 1000); };
     </script>

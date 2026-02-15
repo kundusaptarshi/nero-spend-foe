@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nero-sync-v1.1.2';
+const CACHE_NAME = 'nero-sync-v1.6.1';
 const ASSETS = [
   './',
   './index.html',
@@ -7,7 +7,6 @@ const ASSETS = [
   './Gemini_Generated_Image_jy5o2ejy5o2ejy5o.png'
 ];
 
-// Installation: Caching the assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -17,7 +16,6 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activation: Cleaning up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -32,7 +30,6 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetching: Serving from cache or network
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
