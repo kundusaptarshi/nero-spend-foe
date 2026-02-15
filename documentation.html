@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeroSpendFoe - Pitch Deck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            /* NeroSpendFoe Theme */
+            --bg: #121212;
+            --surface: #1E1E1E;
+            --primary: #FF8243;
+            --text: #FFFFFF;
+            --text-dim: #A0A0A0;
+            --border: #333333;
+        }
+
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            object-fit: contain;
+            border: 2px solid var(--primary);
+            padding: 5px;
+            background: #FFFFFF; /* White background for visibility */
+            display: block; /* Ensure it stays visible */
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin-top: 50px;
+            margin-bottom: 25px;
+            color: var(--text);
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            margin-bottom: 20px;
+        }
+
+        strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 15px;
+            padding-left: 20px;
+            border-left: 3px solid var(--primary);
+            color: var(--text-dim);
+        }
+
+        .highlight-box {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--text);
+            margin-bottom: 40px;
+            border-left: 4px solid var(--primary);
+            padding-left: 20px;
+        }
+
+        .mermaid {
+            background: var(--surface);
+            padding: 20px; /* Reduced padding */
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            border: 1px solid var(--border);
+        }
+
+        .footer {
+            margin-top: 80px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+        
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header with Logo - No error hiding script -->
+        <img src="Gemini_Generated_Image_kggd5tkggd5tkggd.png" alt="NeroSpendFoe Logo" class="logo">
+        
+        <h1>NeroSpendFoe</h1>
+        <div class="tagline">Stop Budgeting. Start Managing.</div>
+
+        <!-- Section 1: Introduction -->
+        <h2>1. Executive Summary</h2>
+        <p>Most financial apps operate as rearview mirrors—they tell users where their money went after it is already gone. They induce guilt without offering solutions. <strong>NeroSpendFoe</strong> is different.</p>
+        
+        <p>It is a <strong>Forward-Looking Liquidity Engine</strong> designed for the modern spender who wants freedom, not restrictions. It answers the only question that matters: <em>"How much can I spend right now without ruining the rest of my month?"</em></p>
+
+        <div class="highlight-box">
+            <h3>Value Proposition</h3>
+            <ul>
+                <li><strong>Zero Anxiety:</strong> Never worry about running out of money. Nero calculates exactly what you can spend today to stay safe for the duration of the cycle.</li>
+                <li><strong>Dynamic Adaptation:</strong> Spend too much today? Nero automatically lowers future limits slightly to recover. Save today? Nero instantly rewards you with higher future limits.</li>
+                <li><strong>Privacy First:</strong> No bank linking. No login. No data tracking. Financial data lives 100% locally on the device.</li>
+            </ul>
+        </div>
+
+        <!-- Section 2: User Journey -->
+        <h2>2. The User Journey & Adjustment Logic</h2>
+        <p>NeroSpendFoe operates on a continuous feedback loop. Every action triggers an instant mathematical recalculation of the user's financial future.</p>
+
+        <div class="mermaid">
+            graph TD
+            %% Styles
+            classDef default fill:#2D2D2D,stroke:#666,stroke-width:1px,color:#fff;
+            classDef start fill:#C25621,stroke:#FF8243,stroke-width:2px,color:#fff;
+            classDef error fill:#B91C1C,stroke:#E8083E,stroke-width:2px,color:#fff;
+            classDef success fill:#059669,stroke:#10B981,stroke-width:2px,color:#fff;
+            classDef logic fill:#404040,stroke:#A0A0A0,stroke-width:1px,color:#fff,stroke-dasharray: 5 5;
+
+            %% Top Layer: Inputs (Side by Side)
+            subgraph Inputs [Inputs]
+                direction LR
+                style Inputs fill:none,stroke:none
+                Start([Start New Month]):::start
+                Bonus[Income / Bonus]:::default -->|Top-Up| Boost[Instant Increase]:::success
+            end
+
+            %% Connect Inputs to Dashboard
+            Start -->|Set Pool| Dashboard[Dashboard]:::default
+            Boost --> Dashboard
+
+            %% Middle Layer: The Cycle (Horizontal layout for height reduction)
+            subgraph Daily_Cycle [The Daily Flow]
+                direction LR
+                style Daily_Cycle fill:none,stroke:#333,stroke-dasharray: 5 5
+                
+                Dashboard --> Decision{Spend?}:::default
+                Decision -- Yes --> Transaction[Log Expense]:::default
+                Transaction --> Logic{"Check Minimum Limit set by user"}:::logic
+                
+                Logic -- Violation --> Block[BLOCK: Breach]:::error
+                Logic -- Safe --> Deduct[Update Pool]:::default
+                
+                Block -.-> Dashboard
+                Deduct --> CheckRatio{Check Daily Ratios}:::logic
+                CheckRatio --> Recalculate[RECALCULATE PROPORTIONATELY]:::start
+            end
+
+            %% Bottom Layer: Results (Side by Side)
+            subgraph Results [Adaptation]
+                direction LR
+                style Results fill:none,stroke:none
+                Recalculate --> Drop[Decrease Limits]:::default
+                Recalculate --> Rise[Increase Limits]:::success
+            end
+
+            Recalculate -.-> Dashboard
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Section 3: Text Example -->
+        <h2>3. Real World Scenarios</h2>
+        <p>To understand the power of NeroSpendFoe, consider these two scenarios for a user named Alex.</p>
+        <p><strong>Baseline:</strong> Monthly Limit: $3,000 | Days Remaining: 30 | <strong>Daily Limit: $100.00</strong></p>
+        
+        <div class="highlight-box">
+            <h3>Scenario A: The Overspend (The Coffee Machine)</h3>
+            <p><strong>Action:</strong> Alex buys an expensive coffee machine for $400 on Day 1.</p>
+            <p><strong>Standard App:</strong> Shows a red bar. "You overspent!" Alex feels guilty and ignores the app.</p>
+            <p><strong>NeroSpendFoe:</strong>
+            <ul>
+                <li>Accepts the transaction ($400).</li>
+                <li>Calculates remaining pool: $2,600.</li>
+                <li>Calculates remaining days: 29.</li>
+                <li><strong>New Daily Limit: $89.65</strong></li>
+                <li><em>The deficit is distributed proportionately across all remaining days based on Alex's defined weekly ratios.</em></li>
+            </ul>
+            </p>
+            <p><strong>The Result:</strong> Nero doesn't scold Alex. It simply adjusts the reality. By spending slightly less ($89 instead of $100) for the rest of the month, Alex stays solvent.</p>
+        </div>
+
+        <div class="highlight-box">
+            <h3>Scenario B: The Underspend (The Quiet Day)</h3>
+            <p><strong>Action:</strong> On Day 2, Alex stays home and only spends $10 on groceries.</p>
+            <p><strong>Standard App:</strong> Shows nothing special. The money sits idly in the "Groceries" category.</p>
+            <p><strong>NeroSpendFoe:</strong>
+            <ul>
+                <li><strong>Yesterday's Limit:</strong> $89.65</li>
+                <li><strong>Spent:</strong> $10.00</li>
+                <li><strong>Surplus:</strong> $79.65 saved!</li>
+                <li>This surplus is instantly divided across the remaining 28 days <strong>proportionately based on user defined ratios</strong>.</li>
+                <li><strong>New Daily Limit: $92.50</strong></li>
+            </ul>
+            </p>
+            <p><strong>The Result:</strong> Immediate gratification. By saving today, Alex watches his future purchasing power grow in real-time.</p>
+        </div>
+
+        <!-- Section 4: Strategic Controls -->
+        <h2>4. Strategic Controls</h2>
+        <p>NeroSpendFoe isn't just a calculator; it is a strategist. It includes advanced features to tailor the math to any lifestyle.</p>
+
+        <h3>Minimum Daily Limit (The Safety Net)</h3>
+        <p><strong>The Problem:</strong> In standard budgeting, a user might spend so much early in the month that they have $0 left for the last week.</p>
+        <p><strong>The Nero Solution:</strong> The user sets a "Safety Floor" (e.g., $50). The app mathematically guarantees that no matter how much is spent today, there will <em>always</em> be at least $50/day available for every remaining day. It will block any transaction that violates this rule.</p>
+
+        <h3>Limit Distribution Ratio (Velocity Weights)</h3>
+        <p><strong>The Problem:</strong> Users don't spend the same amount on a Monday as they do on a Saturday. Flat averages set them up to fail.</p>
+        <p><strong>The Nero Solution:</strong> Configure the week.</p>
+        <ul>
+            <li><strong>Weekdays:</strong> Weight = 1.0</li>
+            <li><strong>Weekends:</strong> Weight = 2.0</li>
+            <li><strong>Result:</strong> Nero automatically allocates <strong>double the budget</strong> for Saturdays and Sundays, shrinking weekday limits slightly to compensate.</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <!-- Section 5: Cycle Management -->
+        <h2>5. Cycle Management</h2>
+        
+        <h3>The Rollover Advantage (Carry Forward)</h3>
+        <p>Unlike traditional budgets that reset to zero and "lose" your progress, Nero respects your savings.</p>
+        <ul>
+            <li><strong>End of Month:</strong> The app detects the cycle end and locks the daily forecast to prevent accidental changes.</li>
+            <li><strong>New Month Initialization:</strong> When starting the next month, Nero calculates any remaining funds from the previous cycle.</li>
+            <li><strong>The Boost:</strong> Users are offered a one-tap choice: "Carry forward remaining $350?" If accepted, this amount is added <strong>on top of the new monthly limit</strong>, permanently increasing the spending power for the new month.</li>
+        </ul>
+
+        <!-- Section 6: Global & Tech -->
+        <h2>6. Technical Excellence</h2>
+
+        <h3>Global Adaptability</h3>
+        <p>Nero supports over 10 major global currencies (USD, EUR, INR, JPY, etc.) and features custom reset policies. Users can choose between a standard <strong>Midnight Reset</strong> or an <strong>Indian/Late Night Policy</strong> (6:00 AM reset) for night owls.</p>
+
+        <h3>Progressive Web App (PWA) Architecture</h3>
+        <p>Built for speed and privacy.</p>
+        <ul>
+            <li><strong>Instant Load:</strong> Uses a Service Worker to cache assets. Opens in under 0.2 seconds.</li>
+            <li><strong>Offline First:</strong> Works perfectly in a tunnel, on a plane, or in a dead zone.</li>
+            <li><strong>Ultra Lightweight:</strong> Consumes less than 5MB of storage.</li>
+            <li><strong>Zero Maintenance:</strong> The app updates itself silently in the background.</li>
+        </ul>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>NeroSpendFoe v1.12.0</strong></p>
+            <p>Concept & Code by <strong>Saptarshi Kundu</strong></p>
+            <p>Contact: <a href="mailto:kundusaptarshi2@gmail.com">kundusaptarshi2@gmail.com</a></p>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                fontFamily: 'Inter',
+                primaryColor: '#1E1E1E',
+                primaryTextColor: '#FFFFFF',
+                primaryBorderColor: '#FF8243',
+                lineColor: '#A0A0A0'
+            }
+        });
+    </script>
+</body>
+</html>
