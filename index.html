@@ -17,7 +17,7 @@
         if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').then(() => {
-                    console.log('Nero Sync v1.6.3 active.');
+                    console.log('Nero Sync v1.6.4 active.');
                 });
             });
         }
@@ -288,7 +288,7 @@
         </div>
 
         <footer class="footer">
-            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.6.3</div>
+            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.6.4</div>
         </footer>
     </div>
 
@@ -385,7 +385,7 @@
                 <!-- Page 7: About -->
                 <div class="manual-page">
                     <h2>About</h2>
-                    <p style="color: var(--text-dim); margin-bottom: 15px;"><b>NeroSpendFoe v1.6.3</b></p>
+                    <p style="color: var(--text-dim); margin-bottom: 15px;"><b>NeroSpendFoe v1.6.4</b></p>
                     <p style="color: var(--text-dim); margin-bottom: 25px;">Concept & Code by <b>Saptarshi Kundu</b>.</p>
                     <div class="guide-section">
                         <h3>What's New</h3>
@@ -515,8 +515,8 @@
     </div>
 
     <script>
-        // UNIFIED STORAGE KEY V1.6.3
-        const STORAGE_KEY = 'nero_sync_v1_6_3';
+        // UNIFIED STORAGE KEY V1.6.4
+        const STORAGE_KEY = 'nero_sync_v1_6_4';
 
         let state = {
             name: "", currency: "₹", policy: "indian", pool: 0, 
@@ -529,7 +529,9 @@
         try {
             const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
             if (saved) {
+                // Merge valid saved data while preserving defaults for missing keys
                 state = { ...state, ...saved };
+                // Ensure ratios are valid array
                 if (!Array.isArray(state.ratios) || state.ratios.length !== 7) state.ratios = [1, 1, 1, 1, 1, 2, 2];
             }
         } catch (e) {
@@ -652,13 +654,7 @@
             const overEl = document.getElementById('overspend-status-text');
             if (overEl) overEl.style.display = (leftover < -0.01 && !stale && !inactive) ? 'block' : 'none';
             
-            const bTopup = document.getElementById('btn-topup-main-act');
-            const bForecast = document.getElementById('btn-forecast-main-act');
-            const bFundHist = document.getElementById('btn-fund-history-act');
-            
-            if (bTopup) bTopup.classList.toggle('disabled-look', stale || inactive);
-            if (bForecast) bForecast.classList.toggle('disabled-look', stale || inactive);
-            if (bFundHist) bFundHist.classList.toggle('disabled-look', stale || inactive);
+            // Note: Visual dimming removed as per request v1.5.2
 
             updateDynamicCurrencyLabels(state.currency);
 
@@ -861,7 +857,7 @@
 
         // --- Manual Pagination Logic ---
         let currentManualPage = 0;
-        const totalManualPages = 9; 
+        const totalManualPages = 7; // Fixed count from v1.6.2 logic
 
         function updateManualUI() {
             document.querySelectorAll('.manual-page').forEach((el, i) => {
