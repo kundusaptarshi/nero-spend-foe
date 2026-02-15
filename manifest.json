@@ -8,13 +8,13 @@
   "theme_color": "#121212",
   "icons": [
     {
-      "src": "Gemini_Generated_Image_jy5o2ejy5o2ejy5o.png?v=1.6.1",
+      "src": "Gemini_Generated_Image_jy5o2ejy5o2ejy5o.png?v=1.6.5",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "Gemini_Generated_Image_jy5o2ejy5o2ejy5o.png?v=1.6.1",
+      "src": "Gemini_Generated_Image_jy5o2ejy5o2ejy5o.png?v=1.6.5",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

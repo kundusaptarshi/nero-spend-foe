@@ -17,7 +17,7 @@
         if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').then(() => {
-                    console.log('Nero Sync v1.6.4 active.');
+                    console.log('Nero Sync v1.6.5 active.');
                 });
             });
         }
@@ -28,6 +28,7 @@
             if (fallback) fallback.style.display = 'block';
         }
     </script>
+
     <style>
         :root {
             --bg: #121212;
@@ -287,7 +288,7 @@
         </div>
 
         <footer class="footer">
-            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.6.4</div>
+            <div class="footer-text">© 2026 SAPTARSHI KUNDU • v1.6.5</div>
         </footer>
     </div>
 
@@ -311,7 +312,7 @@
                     </div>
                 </div>
 
-                <!-- Page 2: Installation -->
+                <!-- Page 2: Setup -->
                 <div class="manual-page">
                     <h2>Setup & Install</h2>
                     <div class="guide-section">
@@ -384,7 +385,7 @@
                 <!-- Page 7: About -->
                 <div class="manual-page">
                     <h2>About</h2>
-                    <p style="color: var(--text-dim); margin-bottom: 15px;"><b>NeroSpendFoe v1.6.4</b></p>
+                    <p style="color: var(--text-dim); margin-bottom: 15px;"><b>NeroSpendFoe v1.6.5</b></p>
                     <p style="color: var(--text-dim); margin-bottom: 25px;">Concept & Code by <b>Saptarshi Kundu</b>.</p>
                     <div class="guide-section">
                         <h3>What's New</h3>
@@ -514,8 +515,8 @@
     </div>
 
     <script>
-        // UNIFIED STORAGE KEY V1.6.4
-        const STORAGE_KEY = 'nero_sync_v1_6_4';
+        // UNIFIED STORAGE KEY V1.6.5
+        const STORAGE_KEY = 'nero_sync_v1_6_5';
 
         let state = {
             name: "", currency: "₹", policy: "indian", pool: 0, 
@@ -653,7 +654,13 @@
             const overEl = document.getElementById('overspend-status-text');
             if (overEl) overEl.style.display = (leftover < -0.01 && !stale && !inactive) ? 'block' : 'none';
             
-            // Note: Visual dimming removed as per request v1.5.2
+            const bTopup = document.getElementById('btn-topup-main-act');
+            const bForecast = document.getElementById('btn-forecast-main-act');
+            const bFundHist = document.getElementById('btn-fund-history-act');
+            
+            if (bTopup) bTopup.classList.toggle('disabled-look', stale || inactive);
+            if (bForecast) bForecast.classList.toggle('disabled-look', stale || inactive);
+            if (bFundHist) bFundHist.classList.toggle('disabled-look', stale || inactive);
 
             updateDynamicCurrencyLabels(state.currency);
 
